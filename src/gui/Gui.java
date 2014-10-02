@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -24,6 +25,8 @@ public class Gui {
 	private JLabel 		headerLabel;
 	private JLabel 		statusLabel;
 	private JPanel 		controlPanel;
+	private String		ipAdd;
+	private String		portNum;
 	
 	public Gui(){
 		prepareGUI();
@@ -46,7 +49,7 @@ public class Gui {
         
         controlPanel = new JPanel();
         controlPanel.setLayout(new FlowLayout());
-
+        
         mainFrame.add(headerLabel);
         mainFrame.add(controlPanel);
         mainFrame.add(statusLabel);
@@ -65,13 +68,15 @@ public class Gui {
       layout.setVgap(10);
       panel.setLayout(layout);        
 
+      //----------- SERVER -------------------------------------//
+      
       JPanel serverPanel = new JPanel();
       GroupLayout serverLayout = new GroupLayout(serverPanel);
       serverLayout.setAutoCreateGaps(true);
       serverLayout.setAutoCreateContainerGaps(true);
       
       JLabel portNumLabel = new JLabel("Enter port number");
-      JTextField portNumText = new JTextField(20);
+      final JTextField portNumText = new JTextField(20);
       JButton connectServerBtn = new JButton("Connect");
       JButton cancelServerBtn = new JButton("Cancel");
       
@@ -97,13 +102,28 @@ public class Gui {
             )                                
       );
       
+      connectServerBtn.addActionListener(new ActionListener() {
+    	  public void actionPerformed(ActionEvent e) {
+    		  portNum = portNumText.getText();
+    		  statusLabel.setText("Port number: " + portNum);
+		 }          
+      });
+      
+      cancelServerBtn.addActionListener(new ActionListener() {
+    	  public void actionPerformed(ActionEvent e) {
+    		  statusLabel.setText("Cancel server");
+		 }          
+      });
+      
+      //----------- CLIENT -------------------------------------//
+      
       JPanel clientPanel = new JPanel();
       GroupLayout clientLayout = new GroupLayout(clientPanel);
       clientLayout.setAutoCreateGaps(true);
       clientLayout.setAutoCreateContainerGaps(true);
       
       JLabel ipAddLabel = new JLabel("Enter IP address");
-      JTextField ipAddText = new JTextField(20);
+      final JTextField ipAddText = new JTextField(20);
       JButton connectClientBtn = new JButton("Connect");
       JButton cancelClientBtn = new JButton("Cancel");
       
@@ -128,6 +148,19 @@ public class Gui {
                .addComponent(cancelClientBtn)       
             )                                
       );
+      
+      connectClientBtn.addActionListener(new ActionListener() {
+    	  public void actionPerformed(ActionEvent e) {
+    		  ipAdd = ipAddText.getText();
+    		  statusLabel.setText("IP: " + ipAdd);
+		 }          
+      });
+      
+      cancelClientBtn.addActionListener(new ActionListener() {
+    	  public void actionPerformed(ActionEvent e) {
+    		  statusLabel.setText("Cancel client");
+		 }          
+      });
 
       serverPanel.setLayout(serverLayout);
       clientPanel.setLayout(clientLayout);
@@ -164,6 +197,14 @@ public class Gui {
 
       mainFrame.setVisible(true);  
    }
+	
+	public String getPortNum(){
+		return portNum;
+	}
+	
+	public String getIpAdd(){
+		return ipAdd;
+	}
  
     public static void main(String[] args) {
         //Schedule a job for the event-dispatching thread:
