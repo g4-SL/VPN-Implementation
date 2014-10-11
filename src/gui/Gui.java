@@ -27,6 +27,7 @@ public class Gui {
 	private JPanel 		controlPanel;
 	private String		ipAdd;
 	private String		portNum;
+	private String		hostName;
 	
 	public Gui(){
 		prepareGUI();
@@ -34,12 +35,12 @@ public class Gui {
 	
 	private void prepareGUI(){
         mainFrame = new JFrame("VPN EECE 412");
-        mainFrame.setSize(600,500);
+        mainFrame.setSize(800,600);
         mainFrame.setLayout(new GridLayout(3, 1));
 
         headerLabel = new JLabel("", JLabel.CENTER);        
         statusLabel = new JLabel("",JLabel.CENTER); 
-        statusLabel.setSize(350,100);
+        statusLabel.setSize(350,50);
         
         mainFrame.addWindowListener(new WindowAdapter() {
            public void windowClosing(WindowEvent windowEvent){
@@ -61,7 +62,7 @@ public class Gui {
 
       final JPanel panel = new JPanel();
       panel.setBackground(Color.CYAN);
-      panel.setSize(300,300);
+      panel.setSize(400,400);
 
       CardLayout layout = new CardLayout();
       layout.setHgap(10);
@@ -123,7 +124,9 @@ public class Gui {
       clientLayout.setAutoCreateContainerGaps(true);
       
       JLabel ipAddLabel = new JLabel("Enter IP address");
-      final JTextField ipAddText = new JTextField(20);
+      final JTextField ipAddText = new JTextField(20);      
+      JLabel hostNameLabel = new JLabel("Enter host name");
+      final JTextField hostNameText = new JTextField(20);
       JButton connectClientBtn = new JButton("Connect");
       JButton cancelClientBtn = new JButton("Cancel");
       
@@ -132,6 +135,8 @@ public class Gui {
 			 GroupLayout.Alignment.LEADING)
 	         .addComponent(ipAddLabel)
 	         .addComponent(ipAddText)
+	         .addComponent(hostNameLabel)
+	         .addComponent(hostNameText)
 	         .addGroup(clientLayout.createSequentialGroup()
         		 .addComponent(connectClientBtn)
                  .addComponent(cancelClientBtn) 
@@ -142,6 +147,8 @@ public class Gui {
       clientLayout.setVerticalGroup(clientLayout.createSequentialGroup()
          .addComponent(ipAddLabel)
          .addComponent(ipAddText)
+         .addComponent(hostNameLabel)
+         .addComponent(hostNameText)
          	.addGroup(clientLayout.createParallelGroup(
                GroupLayout.Alignment.LEADING)
                .addComponent(connectClientBtn)
@@ -152,7 +159,8 @@ public class Gui {
       connectClientBtn.addActionListener(new ActionListener() {
     	  public void actionPerformed(ActionEvent e) {
     		  ipAdd = ipAddText.getText();
-    		  statusLabel.setText("IP: " + ipAdd);
+    		  hostName = hostNameText.getText();
+    		  statusLabel.setText("IP: " + ipAdd + " and host name: " + hostName);
 		 }          
       });
       
@@ -204,6 +212,10 @@ public class Gui {
 	
 	public String getIpAdd(){
 		return ipAdd;
+	}
+	
+	public String getHostName(){
+		return hostName;
 	}
  
     public static void main(String[] args) {
