@@ -139,13 +139,8 @@ public class Gui {
     		  message = messageTextField.getText();
     		  statusLabel.setText("Port number: " + portNum);
     		  
-    		  //System.out.println("You clicked CONNECT Server Button");
-    		  
     		  // Call VPN package to set up the server
-    		  //VPN myVPN = new VPN();
     		  int portNumber = Integer.parseInt(portNum);
-    		  //System.out.println("Integer value: " + portNumber);
-    		  
     		  myVPN.runServerThread(portNumber);
 		 }          
       });
@@ -205,11 +200,7 @@ public class Gui {
     		  statusLabel.setText("IP: " + ipAdd + " and host name: " + hostName);
     		  
     		  // Call VPN package to set up the client
-    		  //VPN myVPN = new VPN();
     		  int ipNumber = Integer.parseInt(ipAdd);
-    		  //System.out.println("Integer value: " + ipNumber);
-    		  //System.out.println("String value: " + hostName);
-    		  
     		  myVPN.runClientThread(ipNumber, hostName);
     		  
 		 }          
@@ -290,6 +281,7 @@ public class Gui {
     	Gui showGUI = new Gui();      
     	showGUI.showLayout();
     	
+    	// Pass the current GUI object to the VPN
     	myVPN.setGUI(showGUI);
     
     }

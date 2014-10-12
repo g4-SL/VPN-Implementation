@@ -20,20 +20,24 @@ import java.net.UnknownHostException;
 
 public class VPN{
 	
-	private static Gui GuiThatIWant = new Gui();
+	private static Gui gui = new Gui();
 	
-	
-	
+
 	public VPN(){
 		System.out.println("* VPN package is speaking");
 	}
 	
-	
+	/**
+	 * Set access to GUI to display a message.
+	 */
 	public void setGUI(Gui transporter ){
 		
-		GuiThatIWant = transporter;
+		gui = transporter;
 	}
 	
+	/**
+	 * Client Thread.
+	 */
 	public static void runClientThread(final int portNumber, final String hostName){
 
 		(new Thread() {
@@ -55,30 +59,24 @@ public class VPN{
 
 					// Open a socket
 					client = new Socket(hostName, portNumber);
-					//System.out.println("* Client opens a socket");
 
 					// Setup an input stream to receive response from the server
 					input = new BufferedReader(new InputStreamReader( client.getInputStream() ));
-					//System.out.println("* Client sets up Input Stream");
 
 					// Setup an output stream to send data to the server
 					output = new DataOutputStream(client.getOutputStream());
-					//System.out.println("* Client sets up Output Stream ");
-					
-
+				
 					// *********** Send/Receive some stuff ***************
 
-					output.writeBytes("Hola, yo soy Olaf\n");
+					output.writeBytes("Hola, yo soy Client\n");
 					System.out.println("* Client sent out some stuff");
 
 					String received;
 					while( (received = input.readLine()) != null){
 						System.out.println("Client received: " + received);
 						
-						GuiThatIWant.displayMessage(received);
+						gui.displayMessage(received);
 						
-						//Gui myGui = new Gui();
-						//myGui.displayMessage(received);
 					}
 
 					// *********** Close the socket and streams ***********
@@ -105,7 +103,9 @@ public class VPN{
 		} ).start();
 	}
 	
-	
+	/**
+	 * Server Thread.
+	 */
 	public static void runServerThread(final int portNumber){
 
 		(new Thread() {
@@ -130,8 +130,11 @@ public class VPN{
 					String incomingData;
 					while ((incomingData = in.readLine()) != null) {
 						System.out.println("Server received: " + incomingData);
+						
+						gui.displayMessage(incomingData);
+						
 						out.println("Server echoes: " + incomingData); // echo
-						//out.println(" Hola! Como te va?");
+						out.println(" Hola! Como te va? (from server)");
 					}
 
 					// Close streams and sockets
