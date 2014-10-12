@@ -19,22 +19,29 @@ import java.net.UnknownHostException;
  */
 
 public class VPN{
-	
+
 	private static Gui gui = new Gui();
+	private static boolean VERBOSE = true;
+	private static int clientNum;
+	
+	// *********** CLIENT ***********************		
+
+	private static Socket client;
+	private static DataOutputStream output;
+	private static BufferedReader input;
 	
 
 	public VPN(){
 		System.out.println("* VPN package is speaking");
 	}
-	
+
 	/**
 	 * Set access to GUI to display a message.
 	 */
 	public void setGUI(Gui transporter ){
-		
 		gui = transporter;
 	}
-	
+
 	/**
 	 * Client Thread.
 	 */
@@ -46,12 +53,13 @@ public class VPN{
 			public void run(){
 
 				System.out.println("* Client thread is running on port " + portNumber + " host " + hostName);
-				
+				clientNum = portNumber;
+
 				// *********** CLIENT ***********************		
 
-				Socket client;
-				DataOutputStream output;
-				BufferedReader input;
+				//Socket client;
+				//DataOutputStream output;
+				//BufferedReader input;
 
 				try {
 
@@ -65,18 +73,22 @@ public class VPN{
 
 					// Setup an output stream to send data to the server
 					output = new DataOutputStream(client.getOutputStream());
-				
+
 					// *********** Send/Receive some stuff ***************
+
+					//System.out.println("* Client says that you entered: " + gui.getMessage());
 
 					output.writeBytes("Hola, yo soy Client\n");
 					System.out.println("* Client sent out some stuff");
 
+
 					String received;
 					while( (received = input.readLine()) != null){
 						System.out.println("Client received: " + received);
+						output.writeBytes("Did you get my message?\n");
 						
-						gui.displayMessage(received);
-						
+						//gui.displayMessage(received);
+
 					}
 
 					// *********** Close the socket and streams ***********
@@ -98,11 +110,11 @@ public class VPN{
 				}
 
 				// *********** END OF CLIENT ***********************
-				
+
 			}
 		} ).start();
 	}
-	
+
 	/**
 	 * Server Thread.
 	 */
@@ -128,13 +140,18 @@ public class VPN{
 					PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 
 					String incomingData;
+					
+					while((incomingData = in.readLine()) == null){
+						
+						System.out.println("Server gets null");
+					}
+					
 					while ((incomingData = in.readLine()) != null) {
-						System.out.println("Server received: " + incomingData);
-						
-						gui.displayMessage(incomingData);
-						
-						out.println("Server echoes: " + incomingData); // echo
-						out.println(" Hola! Como te va? (from server)");
+						System.out.println(" Server received: " + incomingData);
+
+						//gui.displayMessage(incomingData);
+
+						out.println("Server echoed: " + incomingData); // echo
 					}
 
 					// Close streams and sockets
@@ -142,7 +159,7 @@ public class VPN{
 					out.close();
 					clientSocket.close();
 					server.close();
-					
+
 					System.out.println("* Server closed");
 
 				}
@@ -152,9 +169,32 @@ public class VPN{
 				}
 
 				// *********** End of Server ***********************
-				 
+
 			}
 		} ).start();
 	}
 	
+	/**
+	 * TO DO: Send the message to the server.
+	 * Currently, prints out the message typed in the client's text field.
+	 */
+	public void sendClientMessage(){
+		
+		//System.out.println("Client number: " + clientNum);
+		System.out.println("You typed: " + gui.getMessage());
+		
+		//try {
+		//	output.writeBytes(gui.getMessage());
+			//System.out.println("* Client sent out some stuff");
+			
+		//} catch (IOException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+		//}
+		
+		//output.writeBytes("Hola, yo soy Client\n");
+		//System.out.println("* Client sent out some stuff");
+
+	}
+
 }
