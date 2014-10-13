@@ -13,7 +13,7 @@ import java.net.UnknownHostException;
 
 /*
  * Author: Group 8
- * Date: October 11, 2014
+ * Last Modified: October 12, 2014
  * Course: EECE 412, Assignment 3
  * Purpose: Implements a client and server threads using TCP connection
  */
@@ -21,14 +21,11 @@ import java.net.UnknownHostException;
 public class VPN{
 
 	private static Gui gui = new Gui();
-	private static boolean VERBOSE = true;
-
-	// *********** Client ***********************
+	// ----------- Client ----------------//
 	private static Socket client;
-	private static DataOutputStream output;
 	private static BufferedReader input;
 	private static PrintWriter outputClient;
-	// *********** Server ***********************
+	// ----------- Server ----------------//
 	private static ServerSocket server;
 	private static Socket clientSocket;
 	private static BufferedReader in;
@@ -36,7 +33,7 @@ public class VPN{
 
 
 	public VPN(){
-		System.out.println("* VPN package is speaking");
+		System.out.println("VPN package is speaking");
 	}
 
 	/**
@@ -50,17 +47,13 @@ public class VPN{
 	 * Client Thread.
 	 */
 	public static void runClientThread(final int portNumber, final String hostName){
-
 		(new Thread() {
-
 			@Override
 			public void run(){
-
-				System.out.println("* Client thread is running on port " + portNumber + " host " + hostName);
-
+				System.out.println(" Client thread is running on port " + portNumber + " host " + hostName);
 				try {
 
-					// *********** Initialize the Client *****************
+					// -------------- Initialize the Client ---------------//
 
 					// Open a socket
 					client = new Socket(hostName, portNumber);
@@ -71,33 +64,31 @@ public class VPN{
 					// Setup an output stream to send data to the server
 					outputClient = new PrintWriter(client.getOutputStream(), true);
 
-					// Client handles incoming data here:
+					// --------- Client handles its incoming data here ---------//
+					
 					String received;
 					while( (received = input.readLine()) != null){
 						System.out.println("Client received: " + received);
-						gui.displayMessage(received);
+						gui.displayClientMessage(received);
 					}
 
-					// *********** Close the socket and streams ***********
+					// ----------- Close the client's socket and streams ----------//
 					//output.close();
 					//input.close();
 					//client.close();
-					//System.out.println("* Client closed");
+					//System.out.println(" Client closed");
 
 				}
 				catch (UnknownHostException e) {
-					// TODO Auto-generated catch block
-					System.out.println("*** Client Exception: unknown host");
-					e.printStackTrace();
+					System.out.println("UnknownHostException: unknown host");
+					System.out.println("                      Please enter a valid host name.");
+					//e.printStackTrace();
 				}
 				catch (IOException e) {
-					// TODO Auto-generated catch block
-					System.out.println("*** Client IO Exception");
-					e.printStackTrace();
+					System.out.println("ConnectException: No process is listening on the remote port.");
+					System.out.println("                  Please set up the server first.");
+					//e.printStackTrace();
 				}
-
-				// *********** END OF CLIENT ***********************
-
 			}
 		} ).start();
 	}
@@ -106,34 +97,28 @@ public class VPN{
 	 * Server Thread.
 	 */
 	public static void runServerThread(final int portNumber){
-
 		(new Thread() {
-
 			@Override
 			public void run(){
-
-				System.out.println("* Server thread is running on port " + portNumber);
-
-				// *********** Server ***********************
-				
+				System.out.println(" Server thread is running on port " + portNumber);
 				try {
+					
+					// ----------------- Server ----------------------//
 					server = new ServerSocket(portNumber);
 					clientSocket = server.accept();
 					in = new BufferedReader(
 							new InputStreamReader(clientSocket.getInputStream()));
 					out = new PrintWriter(clientSocket.getOutputStream(), true);
 
-					// Handle incoming data here
+					// -------- Server handles its incoming data here --------//
+					
 					String incomingData;
 					while ((incomingData = in.readLine()) != null) {
 						System.out.println(" Server received: " + incomingData);
-
-						gui.displayMessage(incomingData);
-
-						//out.println("Server echoed: " + incomingData); // echo
+						gui.displayServerMessage(incomingData);
 					}
 
-					// Close streams and sockets
+					// ----------- Close the server's socket and streams ---------//
 					in.close();
 					out.close();
 					clientSocket.close();
@@ -143,33 +128,28 @@ public class VPN{
 
 				}
 				catch (IOException e) {
-					System.out.println("*** Server IO Exception");
-					e.printStackTrace();
+					System.out.println("Server IO Exception. Please try again.");
+					//e.printStackTrace();
 				}
-
-				// *********** End of Server ***********************
 
 			}
 		} ).start();
 	}
 
+	
 	/**
 	 * Send a message from client to server.
 	 */
 	public void sendClientMessage(){
-		
-		outputClient.println(gui.getMessage());
-		
-		//System.out.println("You typed: " + gui.getMessage());
-		//System.out.println("* Client sent out some stuff");
+		outputClient.println(gui.getClientMessage());
 	}
 	
+	
+	/**
+	 * Send a message from server to client.
+	 */
 	public void sendServerMessage(){
-		
-		out.println(gui.getMessage());
-		
-		//System.out.println("You typed: " + gui.getMessage());
-		//System.out.println("* Server sent out some stuff");
+		out.println(gui.getServerMessage());
 	}
 
 }
