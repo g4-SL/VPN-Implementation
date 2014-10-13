@@ -20,7 +20,8 @@ import java.net.UnknownHostException;
 
 public class VPN{
 
-	private static Gui gui = new Gui();
+//	private static Gui gui = new Gui(); //remove this to only show the gui once
+	private static Gui gui;
 	private static boolean VERBOSE = true;
 	private static int clientNum;
 	
@@ -181,7 +182,7 @@ public class VPN{
 	public void sendClientMessage(){
 		
 		//System.out.println("Client number: " + clientNum);
-		System.out.println("You typed: " + gui.getMessage());
+		System.out.println("You typed: " + gui.getClientMsg());
 		
 		//try {
 		//	output.writeBytes(gui.getMessage());
