@@ -9,7 +9,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -24,7 +23,7 @@ import clientServer.VPN;
 
 /*
  * Author: Group 8
- * Date: October 11, 2014
+ * Last Modified: October 12, 2014
  * Course: EECE 412, Assignment 3
  * Purpose: Implements GUI and initiates Client-Server connection.
  * Version: Added send and received text fields.
@@ -35,11 +34,11 @@ public class Gui {
 	private JLabel 		headerLabel;
 	private JLabel 		statusLabel;
 	private JPanel 		controlPanel;
-	private JPanel 		messagePanel;
 	private JPanel 		userTypePanel;
 	private String		ipAdd;
 	private String		portNum;
 	private String		hostName;
+
 	private String		serverMsg;
 	private String		clientMsg;
 	private String		sharedKeyClient;
@@ -52,11 +51,11 @@ public class Gui {
     private JTextField 	displayMsgFieldOnClient;
     
     private static VPN myVPN = new VPN();
-	
+    
 	public Gui(){
 		prepareGUI();
 	}
-	
+
 	private void prepareGUI(){
         mainFrame = new JFrame("VPN EECE 412");
         mainFrame.setSize(600,800);
@@ -90,22 +89,7 @@ public class Gui {
       panel.setSize(400,500);
 
       CardLayout layout = new CardLayout();
-//      layout.setHgap(10);
-//      layout.setVgap(10);
       panel.setLayout(layout);        
-      
-//      //---------------- message box ---------------------------------------------//
-//      
-//      final JLabel messageLabel = new JLabel("Enter your message here");
-//      final JTextField messageTextField = new JTextField(40);
-//      final JLabel displayMsgLabel = new JLabel("Received message");
-//      displayMsgField = new JTextField(40);
-//      messagePanel.add(messageLabel);
-//      messagePanel.add(messageTextField);
-//      messagePanel.add(displayMsgLabel);
-//      messagePanel.add(displayMsgField);
-      
-      
       
       //---------------- message box ---------------------------------------------//
 
@@ -115,7 +99,7 @@ public class Gui {
       final JLabel serverMsgLabel = new JLabel("Enter your message here");
       final JTextField serverMsgTextField = new JTextField(40);
       final JLabel serverDisplayMsgLabel = new JLabel("Received message");
-      final JButton serverSendMsgBtn = new JButton("Send Message");
+      
       serverMsgPanel.setLayout(new GridLayout(6,1));
       displayMsgFieldOnServer = new JTextField(40);
       displayMsgFieldOnServer.setText("Wait for received message to display here");
@@ -124,20 +108,7 @@ public class Gui {
       serverMsgPanel.add(serverMsgTextField);
       serverMsgPanel.add(serverDisplayMsgLabel);
       serverMsgPanel.add(displayMsgFieldOnServer);
-      serverMsgPanel.add(serverSendMsgBtn);
-      
-      serverSendMsgBtn.addActionListener(new ActionListener() {
-    	  public void actionPerformed(ActionEvent e) {
-    		  if(isServerConnected){
-    			  serverMsg = serverMsgTextField.getText();
-    			  statusLabel.setText("Message sent: " + serverMsg);
-    		  }
-    		  else{
-    			  serverMsg = "";
-    			  statusLabel.setText("Connect to a server before sending a message" + serverMsg); //serverMsg is there to check if string is cleared
-    		  }
-    	  }
-      });
+
       
       // for the client
       final JPanel clientMsgPanel = new JPanel();
@@ -145,7 +116,7 @@ public class Gui {
       final JLabel clientMsgLabel = new JLabel("Enter your message here");
       final JTextField clientMsgTextField = new JTextField(40);
       final JLabel clientDisplayMsgLabel = new JLabel("Received message");
-      final JButton clientSendMsgBtn = new JButton("Send Message");
+
       clientMsgPanel.setLayout(new GridLayout(6,1));
       displayMsgFieldOnClient = new JTextField(40);
       displayMsgFieldOnClient.setText("Wait for received message to display here");
@@ -154,20 +125,6 @@ public class Gui {
       clientMsgPanel.add(clientMsgTextField);
       clientMsgPanel.add(clientDisplayMsgLabel);
       clientMsgPanel.add(displayMsgFieldOnClient);
-      clientMsgPanel.add(clientSendMsgBtn);
-      
-      clientSendMsgBtn.addActionListener(new ActionListener() {
-    	  public void actionPerformed(ActionEvent e) {
-    		  if(isClientConnected){
-	    		  clientMsg = clientMsgTextField.getText();
-	    		  statusLabel.setText("Message sent: " + clientMsg);
-    		  }
-    		  else{
-    			  clientMsg = "";
-    			  statusLabel.setText("Connect to a client before sending a message" + clientMsg); //clientMsg is there to check if string is cleared
-    		  }
-		 }          
-      });
       
       
 
@@ -234,24 +191,15 @@ public class Gui {
         		  
         		  statusLabel.setText("Port number: " + portNum);
     		  }
-    		  
-    		  
-/* 
- * need to check if this part can be removed
- * without affecting the program   		  
-    		  portNum = portNumText.getText();
-    		  sharedKeyServer = sharedKeyServerText.getText();
-    		  //message = messageTextField.getText(); // moved this line to Send Button Listener
-    		  statusLabel.setText("Port number: " + portNum + " Shared Key: " + sharedKeyServer);
-    		  
-    		  // Call VPN package to set up the server
-    		  int portNumber = Integer.parseInt(portNum);
-    		  myVPN.runServerThread(portNumber);*/
 		 }          
       });
       
+	/**
+	 * Currently, this button does not close the server. (Do we need it, anyway?)
+	 */
       cancelServerBtn.addActionListener(new ActionListener() {
     	  public void actionPerformed(ActionEvent e) {
+    		  isServerConnected = false;	
     		  portNumText.setText("");
     		  sharedKeyServerText.setText("");
     		  statusLabel.setText("Cancel server");
@@ -261,10 +209,19 @@ public class Gui {
       sendServerMessageBtn.addActionListener(new ActionListener() {
     	  public void actionPerformed(ActionEvent e) {
     		  portNumText.setText("");
-    		  //message = messageTextField.getText();
-    		  statusLabel.setText("Sending server message");
+    		  sharedKeyServerText.setText("");
+    		  
+    		  if(isServerConnected){
+    			  serverMsg = serverMsgTextField.getText();
+	    		  statusLabel.setText("Sending server message: " + serverMsg);
 
-    		  System.out.println("You clicked SEND SERVER button");   		  
+	    		  myVPN.sendServerMessage();
+	    		  System.out.println("You clicked SEND SERVER button");   
+    		  }
+    		  else{
+    			  serverMsg = "";
+    			  statusLabel.setText("Connect to a client before sending a message" + clientMsg); //clientMsg is there to check if string is cleared
+    		  }
 		 }          
       });
       
@@ -342,22 +299,6 @@ public class Gui {
 	    		  
 				  statusLabel.setText("IP: " + ipAdd + " and host name: " + hostName + " Shared Key: " + sharedKeyClient);
     		  }
-    		  
-    		  
-    		  
-    		  
-/* 
- * needs to be removed later
- * checking to see if removing this might affect the program   		  
- 			  ipAdd = ipAddText.getText();
-    		  hostName = hostNameText.getText();
-    		  sharedKeyClient = sharedKeyClientText.getText();
-    		  //message = messageTextField.getText();
-    		  statusLabel.setText("IP: " + ipAdd + " and host name: " + hostName + " Shared Key: " + sharedKeyClient);
-    		  
-    		  // Call VPN package to set up the client
-    		  int ipNumber = Integer.parseInt(ipAdd);
-    		  myVPN.runClientThread(ipNumber, hostName);	*/	  
 		 }          
       });
       
@@ -376,14 +317,23 @@ public class Gui {
     		  ipAddText.setText("");
     		  hostNameText.setText("");
     		  sharedKeyClientText.setText("");
-    		  //message = messageTextField.getText();
-    		  statusLabel.setText("Sending client message");
     		  
-    		  System.out.println("You clicked SEND CLIENT button");
+    		  if(isClientConnected){
+    			  clientMsg = clientMsgTextField.getText();
+    			  statusLabel.setText("Sending client message: " + clientMsg);
     		  
-    		  //myVPN.sendClientMessage();
+    			  myVPN.sendClientMessage();
+        		  System.out.println("You clicked SEND CLIENT button");
+    		  }
+    		  else{
+    			  clientMsg = "";
+    			  statusLabel.setText("Connect to a client before sending a message" + serverMsg); //serverMsg is there to check if string is cleared
+    		  }
 		 }          
       });
+      
+      
+      
 
       serverPanel.setLayout(serverLayout);
       clientPanel.setLayout(clientLayout);
@@ -425,15 +375,13 @@ public class Gui {
 
       mainFrame.setVisible(true);  
    }
-	
-	public String getPortNum(){
-		return portNum;
-	}
-	
+
+
+
 	public String getIpAdd(){
 		return ipAdd;
 	}
-	
+
 	public String getHostName(){
 		return hostName;
 	}
@@ -453,23 +401,23 @@ public class Gui {
 	public void displayMsgOnClient(String input){
 		displayMsgFieldOnClient.setText(input);
 	}
-	
+
 	public String getSharedKeyClient(){
 		return sharedKeyClient;
 	}
-	
+
 	public String getSharedKeyServer(){
 		return sharedKeyServer;
 	}
- 
-    public static void main(String[] args) {
-        //Schedule a job for the event-dispatching thread:
-        //creating and showing this application's GUI.
-    	Gui showGUI = new Gui();      
-    	showGUI.showLayout();
-    	
-    	// Pass the current GUI object to the VPN
-    	myVPN.setGUI(showGUI);
-    
-    }
+
+	public static void main(String[] args) {
+		//Schedule a job for the event-dispatching thread:
+		//creating and showing this application's GUI.
+		Gui showGUI = new Gui();      
+		showGUI.showLayout();
+
+		// Pass the current GUI object to the VPN
+		myVPN.setGUI(showGUI);
+
+	}
 }
