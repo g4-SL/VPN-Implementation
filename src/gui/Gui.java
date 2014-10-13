@@ -157,6 +157,9 @@ public class Gui {
 		 }          
       });
       
+      /**
+       * Currently, this method does not close the server. (Do we need it, anyway?)
+       */
       cancelServerBtn.addActionListener(new ActionListener() {
     	  public void actionPerformed(ActionEvent e) {
     		  portNumText.setText("");
@@ -231,7 +234,7 @@ public class Gui {
     		  ipAdd = ipAddText.getText();
     		  hostName = hostNameText.getText();
     		  sharedKeyClient = sharedKeyClientText.getText();
-    		  //message = messageTextField.getText();
+    		  message = messageTextField.getText();
     		  statusLabel.setText("IP: " + ipAdd + " and host name: " + hostName + " Shared Key: " + sharedKeyClient);
     		  
     		  // Call VPN package to set up the client
@@ -240,6 +243,9 @@ public class Gui {
 		 }          
       });
       
+      /**
+       * Currently, this method does not close the client. (Do we need it, anyway?)
+       */
       cancelClientBtn.addActionListener(new ActionListener() {
     	  public void actionPerformed(ActionEvent e) {
     		  ipAddText.setText("");
@@ -254,12 +260,12 @@ public class Gui {
     		  ipAddText.setText("");
     		  hostNameText.setText("");
     		  sharedKeyClientText.setText("");
-    		  //message = messageTextField.getText();
+    		  message = messageTextField.getText();
     		  statusLabel.setText("Sending client message");
     		  
-    		  System.out.println("You clicked SEND CLIENT button");
+    		  //System.out.println("You clicked SEND CLIENT button");
     		  
-    		  //myVPN.sendClientMessage();
+    		  myVPN.sendClientMessage();
 		 }          
       });
 
