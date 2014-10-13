@@ -92,9 +92,9 @@ public class Gui {
       
       //---------------- message box ---------------------------------------------//
       
-      final JLabel messageLabel = new JLabel("Enter your message here");
+      final JLabel messageLabel = new JLabel("Enter data to be sent");
       final JTextField messageTextField = new JTextField(40);
-      final JLabel displayMsgLabel = new JLabel("Received message");
+      final JLabel displayMsgLabel = new JLabel("Data as received");
       displayMsgField = new JTextField(40);
       messagePanel.add(messageLabel);
       messagePanel.add(messageTextField);
@@ -110,7 +110,7 @@ public class Gui {
       
       JLabel portNumLabel = new JLabel("Enter port number");
       final JTextField portNumText = new JTextField(40);
-      JLabel sharedKeyServerLabel = new JLabel("Enter shared key");
+      JLabel sharedKeyServerLabel = new JLabel("Enter shared secret value");
       final JTextField sharedKeyServerText = new JTextField(20);
       JButton connectServerBtn = new JButton("Connect");
       JButton cancelServerBtn = new JButton("Cancel");
@@ -191,7 +191,7 @@ public class Gui {
       final JTextField ipAddText = new JTextField(40);      
       JLabel hostNameLabel = new JLabel("Enter host name");
       final JTextField hostNameText = new JTextField(20);
-      JLabel sharedKeyClientLabel = new JLabel("Enter shared key");
+      JLabel sharedKeyClientLabel = new JLabel("Enter shared secret value");
       final JTextField sharedKeyClientText = new JTextField(20);
       JButton connectClientBtn = new JButton("Connect");
       JButton cancelClientBtn = new JButton("Cancel");
