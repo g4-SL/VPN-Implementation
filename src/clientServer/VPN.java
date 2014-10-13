@@ -23,11 +23,16 @@ public class VPN{
 	private static Gui gui = new Gui();
 	private static boolean VERBOSE = true;
 
-	// *********** CLIENT ***********************
+	// *********** Client ***********************
 	private static Socket client;
 	private static DataOutputStream output;
 	private static BufferedReader input;
 	private static PrintWriter outputClient;
+	// *********** Server ***********************
+	private static ServerSocket server;
+	private static Socket clientSocket;
+	private static BufferedReader in;
+	private static PrintWriter out;
 
 
 	public VPN(){
@@ -66,6 +71,13 @@ public class VPN{
 					// Setup an output stream to send data to the server
 					outputClient = new PrintWriter(client.getOutputStream(), true);
 
+					// Client handles incoming data here:
+					String received;
+					while( (received = input.readLine()) != null){
+						System.out.println("Client received: " + received);
+						gui.displayMessage(received);
+					}
+
 					// *********** Close the socket and streams ***********
 					//output.close();
 					//input.close();
@@ -103,14 +115,13 @@ public class VPN{
 				System.out.println("* Server thread is running on port " + portNumber);
 
 				// *********** Server ***********************
-
-				ServerSocket server;
+				
 				try {
 					server = new ServerSocket(portNumber);
-					Socket clientSocket = server.accept();
-					BufferedReader in = new BufferedReader(
+					clientSocket = server.accept();
+					in = new BufferedReader(
 							new InputStreamReader(clientSocket.getInputStream()));
-					PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+					out = new PrintWriter(clientSocket.getOutputStream(), true);
 
 					// Handle incoming data here
 					String incomingData;
@@ -119,7 +130,7 @@ public class VPN{
 
 						gui.displayMessage(incomingData);
 
-						out.println("Server echoed: " + incomingData); // echo
+						//out.println("Server echoed: " + incomingData); // echo
 					}
 
 					// Close streams and sockets
@@ -151,6 +162,14 @@ public class VPN{
 		
 		//System.out.println("You typed: " + gui.getMessage());
 		//System.out.println("* Client sent out some stuff");
+	}
+	
+	public void sendServerMessage(){
+		
+		out.println(gui.getMessage());
+		
+		//System.out.println("You typed: " + gui.getMessage());
+		//System.out.println("* Server sent out some stuff");
 	}
 
 }

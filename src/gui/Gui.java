@@ -148,7 +148,7 @@ public class Gui {
     	  public void actionPerformed(ActionEvent e) {
     		  portNum = portNumText.getText();
     		  sharedKeyServer = sharedKeyServerText.getText();
-    		  //message = messageTextField.getText(); // moved this line to Send Button Listener
+    		  message = messageTextField.getText(); // moved this line to Send Button Listener
     		  statusLabel.setText("Port number: " + portNum + " Shared Key: " + sharedKeyServer);
     		  
     		  // Call VPN package to set up the server
@@ -171,10 +171,13 @@ public class Gui {
       sendServerMessageBtn.addActionListener(new ActionListener() {
     	  public void actionPerformed(ActionEvent e) {
     		  portNumText.setText("");
-    		  //message = messageTextField.getText();
+    		  sharedKeyServerText.setText("");
+    		  message = messageTextField.getText();
     		  statusLabel.setText("Sending server message");
 
-    		  System.out.println("You clicked SEND SERVER button");   		  
+    		  //System.out.println("You clicked SEND SERVER button");   	
+    		  
+    		  myVPN.sendServerMessage();
 		 }          
       });
       
