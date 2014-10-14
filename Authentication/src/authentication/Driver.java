@@ -15,6 +15,8 @@ public class Driver
 	
 	public static void main(String[] argv)
 	{
+		do
+		{
 		Authentication client =  new Authentication();
 		Authentication server =  new Authentication();
 		
@@ -65,7 +67,8 @@ public class Driver
 //		System.out.println("the server exponent is: " + server.viewExponent());
 //		System.out.println("the client exponent is: " + client.viewExponent());
 //		
-		String paddedMessage = new String(client.padMessage(1,"this is a test"));
+		String paddedMessage = "this is a test";
+		//paddedMessage = new String(client.padMessage(1,"this is a test"));
 		System.out.println("the padded message is: \"" + paddedMessage + "\"");
 		System.out.println("the padded message of length is: \"" + paddedMessage.length() + "\"");
 		DataFrame testMessage = client.encryptWithPartnerPublicKey(paddedMessage);
@@ -75,12 +78,13 @@ public class Driver
 		//System.out.println("the encrypted message is: \"" + new String(testMessage.data) + "\"");
 		System.out.println("the signed message of length: \"" + testMessage.data.length + "\"");
 		
-		byte[] decryptedMessage = server.decryptWithPartnerPublicKey(testMessage);
+		byte[] decryptedMessage;
+		decryptedMessage = server.decryptWithPartnerPublicKey(testMessage);
 		System.out.println("the unsigned message of length: \"" + decryptedMessage.length + "\"");
 		testMessage.data = decryptedMessage;
-		if(!decryptedMessage.equals(originalEncryption))
+		//if(!decryptedMessage.equals(originalEncryption))
 		{
-			System.out.println("testMessage.data does not match original encryption");
+			//System.out.println("testMessage.data does not match original encryption");
 			for(int i=0;i<decryptedMessage.length;i++)
 			{
 				if(decryptedMessage[i]!=originalEncryption[i])
@@ -88,7 +92,7 @@ public class Driver
 					System.out.println(i + " " + decryptedMessage[i] + " " + originalEncryption[i]);
 				}
 			}
-			
+			//break;
 		}
 		decryptedMessage = server.decryptWithMyPrivateKey(testMessage);
 		System.out.println("the unencrypted message of length: \"" + testMessage.data.length + "\"");
@@ -140,6 +144,7 @@ public class Driver
 //			e.printStackTrace();
 //		}
 //		
+		}while(false);
 		System.out.println("Done");
 		
 		return;

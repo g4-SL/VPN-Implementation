@@ -52,13 +52,13 @@ public class Authentication
 	private final static int pValue = 1376410991;
 	private final static int gValue = 2069551451;
 	
-	public String buildMessage()
-	{
-		String retVal = new String();
-		//setExponent();
-		
-		return retVal;
-	}
+//	public String buildMessage()
+//	{
+//		String retVal = new String();
+//		//setExponent();
+//		
+//		return retVal;
+//	}
 	
 	
 //	public static String getGAmodP()
@@ -81,52 +81,32 @@ public class Authentication
 	
 	public BigInteger getGAmodP()
 	{
-		//String retVal;
-		//int a; //PRIVATE exponent value
-		//a = rand.nextInt();
-		
 		BigInteger p = new BigInteger(Integer.toString(pValue));
 		BigInteger g = new BigInteger(Integer.toString(gValue));
-		BigInteger Xa;// = new BigInteger(Integer.toString(XaValue));
-		
+		BigInteger Xa;
 		
 		Xa = g.modPow(new BigInteger(Integer.toString(exponent)), p);
-		//retVal = Xa.toString();
 		return Xa;
-				
 	}
 	
 	public BigInteger getGAmodP( int gValue)
 	{
-		//String retVal;
-		//int a; //PRIVATE exponent value
-		//a = rand.nextInt();
-		
 		BigInteger p = new BigInteger(Integer.toString(pValue));
 		BigInteger g = new BigInteger(Integer.toString(gValue));
-		BigInteger Xa;// = new BigInteger(Integer.toString(XaValue));
-		
+		BigInteger Xa;
 		
 		Xa = g.modPow(new BigInteger(Integer.toString(exponent)), p);
-		//retVal = Xa.toString();
 		return Xa;
-				
 	}
 	
 	public BigInteger getGAmodP( BigInteger gValue)
 	{
-		//String retVal;
-		//int a; //PRIVATE exponent value
-		//a = rand.nextInt();
-		
 		BigInteger p = new BigInteger(Integer.toString(pValue));
 		BigInteger g = new BigInteger(gValue.toString());
 		BigInteger Xa;
 		
 		Xa = g.modPow(new BigInteger(Integer.toString(exponent)), p);
-		//retVal = Xa.toString();
 		return Xa;
-				
 	}
 	
 //	public int getExponent()
