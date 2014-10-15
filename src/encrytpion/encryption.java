@@ -14,18 +14,19 @@ public class encryption{
     private static ArrayList<String> log_en = new ArrayList<String>();
     private static ArrayList<String> log_de = new ArrayList<String>();
     
-	public static int IV = 'X';
+    private static String key;
 	public static int Z = 40;//40
+	public static int SPLIT = 7;
+	
     public static void main(String[] args) throws IOException {
     	/*
     	while(true){
     		//ecc4f1f4666ca02250aaf055185f1036
-	    	String plaintext = "sdlfkjsdflksdflksdfjklsdjflsdflksdflksdajfkldsjldsjflksdjfj";
-	    	System.out.println(md5(plaintext));
-	    	//System.out.println("Large binary number: "+Integer.parseInt("0000000010011100100101010011111101100000", 2));
-	    	String ciphertext = encrypt(plaintext,"999999999999999999999999999999");
+	    	String plaintext = "ABCFdsabcdSg;,df gvflkdgmdf;lzgmflkmlsdmflsdmfosdfldsjflkdsjflsdjfl;ksdajflksadffkl;mldfgm;ldfl;,fdgde";
+	    	key = "99999999999999999999999999999999999999999999999999999999999999999999999sNFkjsDNfkjdsnfmlsdfnsdlkfmdsllkjf9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999";
+	       	String ciphertext = encrypt(plaintext,key);
 	    	System.out.println("Ciphertext:"+ciphertext+"\n");
-	    	System.out.println("Plaintext:"+decrypt(ciphertext,"999999999999999999999999999999"));
+	    	System.out.println("Plaintext:"+decrypt(ciphertext,key));
 	    	System.out.println("=======================================================================================================");
 	    	//System.out.println("Brute Force: " +bruteF(ciphertext));
     	}*/
@@ -33,15 +34,35 @@ public class encryption{
     
 	public static String encrypt(String plaintext, String key_in){
 		log_en.clear();
-		//Scanner in = new Scanner(System.in);
-		String ciphertext = "";
-		//System.out.print("Please enter the key:\n");
-		ArrayList<Integer> hash = new ArrayList();
-		
 		log_en.add("Key: "+key_in+"\n");
+		ArrayList<Integer> hash = new ArrayList();
 		hash(md5(key_in),hash);
 		log_en.add("md5(key): "+ md5(key_in)+"\n");
 		log_en.add("hash(md5(key)): "+hash+"\n");
+		
+		String ciphertext = "";
+		int i,j=0;
+		String tmp = "";
+		for ( i = 0 ; i < plaintext.length();i+=SPLIT){
+			if (i+SPLIT < plaintext.length()){
+				tmp = en_loop(plaintext.substring(i,i+SPLIT),hash);
+			}
+			else{
+				tmp = en_loop(plaintext.substring(i,plaintext.length()),hash);
+			}
+			ciphertext += tmp;
+		}
+		log_en.add("Ciphertext: " + ciphertext);
+		
+		return ciphertext;
+	}
+	
+	public static String en_loop(String plaintext, ArrayList<Integer> hash){
+		//Scanner in = new Scanner(System.in);
+		String ciphertext = "";
+		//System.out.print("Please enter the key:\n");
+		
+		int IV = 0 + (int)(Math.random() * ((10000000 - 0) + 1));
 		int c = IV;
 		int i,key;
 		for (i=0;i<plaintext.length();i++){
@@ -64,22 +85,37 @@ public class encryption{
 	
 	public static String decrypt(String ciphertext, String key_in){
 		log_de.clear();
-		String plaintext = "";
-		//Scanner in = new Scanner(System.in);
-		//System.out.print("Please enter the key:");
 		ArrayList<Integer> hash = new ArrayList();
 		hash(md5(key_in),hash);
 		log_de.add("md5(key): "+ md5(key_in)+"\n");
 		log_de.add("hash(md5(key)): "+hash+"\n");
+		
+		String plaintext = "";
+		int i;
+		String tmp = "";
+		for ( i = 0 ; i< ciphertext.length();i+=(SPLIT+1)*Z){
+			if (i+(SPLIT+1)*Z < ciphertext.length()){
+				tmp = de_loop(ciphertext.substring(i,i+(SPLIT+1)*Z),hash);
+				//System.out.println(ciphertext.substring(i,i+8*Z));
+			}
+			else{
+				tmp = de_loop(ciphertext.substring(i,ciphertext.length()),hash);
+				//System.out.println(ciphertext.substring(i,ciphertext.length()));
+			}
+			plaintext+=tmp;
+		}
+		
+		return plaintext;
+
+	}
+	
+	public static String de_loop(String ciphertext,ArrayList<Integer> hash){
+		String plaintext = "";
 		int key,m = 0;
 
 		for (int i = ciphertext.length()-Z,j= hash.size()-((ciphertext.length()/Z)%hash.size()-1); i >=Z; i-= Z,j++){
 			key = hash.get(hash.size() - j%hash.size()-1);
-			//System.out.println(Integer.parseInt(ciphertext.substring(i,i+7), 2));
-			//System.out.printf("Before shifting: %d\n",Integer.parseInt(ciphertext.substring(i,i+Z), 2));
-			//System.out.printf("After shifting: %d\n",shift(Integer.parseInt(ciphertext.substring(i,i+Z), 2),key,2));
 			m = shift(Integer.parseInt(ciphertext.substring(i,i+Z), 2),key,2);
-			//System.out.printf("%d XOR %d\n",m,Integer.parseInt(ciphertext.substring(i-7,i), 2));
 			m ^= Integer.parseInt(ciphertext.substring(i-Z,i), 2);
 			plaintext = (char) m + plaintext;
 			log_de.add("shift(ciphertext("+i+"-"+(i+Z)+")) with key "+key+" : "+m+"\nPlaintext: "+plaintext+"\n");
@@ -131,8 +167,10 @@ public class encryption{
 			else
 				tmp = str.charAt(i) + str.charAt(i+1);
 			for (j=0;j<i;j++){
-				if (tmp + hash.get(j) > 100000000)
+				if (tmp + hash.get(j) > 100000000){
 					tmp -= 100000000;
+					tmp /= 7;
+				}
 				tmp += hash.get(j);
 			}
 			hash.add(tmp);
