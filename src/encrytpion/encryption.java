@@ -42,8 +42,7 @@ public class encryption{
 			//System.out.println(c_string(c));
 			ciphertext += c_string(c);
 		}
-		System.out.println();
-		
+	
 		return c_string(IV)+ciphertext;
 	}
 	
