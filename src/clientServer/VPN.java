@@ -36,7 +36,8 @@ public class VPN{
 
 	private static encryption en;
 	
-	private static boolean mode = false; // false is authentication mode, true is encryption mode
+	private static boolean serverMode = true; // true is authentication mode, false is encryption mode
+	private static boolean clientMode = true; // true is authentication mode, false is encryption mode
 	private static String authClientMsg;
 	private static String authServerMsg;
 	
@@ -74,13 +75,12 @@ public class VPN{
 					outputClient = new PrintWriter(client.getOutputStream(), true);
 
 					// --------- Client handles its incoming data here ---------//
-					
-					
+							
 					String received;
 					while( (received = input.readLine()) != null){
 
-						if(mode == false){
-							System.out.println("Client is in Authenticaon mode");						
+						if(clientMode == true){
+							System.out.println("Client is in Authentication mode");						
 							authClientMsg = received;
 							System.out.println("Client msg received (copy): " + authClientMsg);
 							System.out.println("Client msg received (original): " + received);
@@ -135,9 +135,8 @@ public class VPN{
 					String incomingData;
 					while ((incomingData = in.readLine()) != null) {
 
-						if(mode == false){
-							System.out.println("Server is in Authenticaon mode");
-							//System.out.println("Server msg received: " + incomingData);
+						if(serverMode == true){
+							System.out.println("Server is in Authentication mode");							
 							authServerMsg = incomingData;
 							System.out.println("Server msg received (copy): " + authServerMsg);
 							System.out.println("Server msg received (original): " + incomingData);
@@ -189,28 +188,51 @@ public class VPN{
 	}
 	
 	/**
-	 * Send a char array message from client to server through Authentication module.
+	 * Send a char array message from client to server.
+	 * @Module: Authentication.
 	 */
 	public void sendAuthClientMessage(char[] charArr){		
 		outputClient.println(charArr);
-		System.out.println("Client sent auth message: " + charArr.toString());
 	}
 
 	/**
-	 * Send a char array message from server to client through Authentication module.
+	 * Send a char array message from server to client.
+	 * @Module: Authentication.
 	 */
 	public void sendAuthServerMessage(char[] charArr){
-
 		out.println(charArr);
-		System.out.println("Server sent auth message: " + charArr.toString());
 	}
 	
-	public String getaAthClientString(){
+	/**
+	 * Returns the client's received message as a String.
+	 * @Module: Authentication.
+	 */
+	public String getAuthClientString(){
 		return authClientMsg;				
 	}
 	
-	public String getAuthClientString(){
+	/**
+	 * Returns the server's received message as a String.
+	 * @Module: Authentication.
+	 */
+	public String getAuthServerString(){
 		return authServerMsg;
+	}
+	
+	/*
+	 * Set the client mode of operation.
+	 * True is encryption, false is authentication.
+	 */
+	public void setClientMode(boolean mode){
+		clientMode = mode;
+	}
+	
+	/*
+	 * Set the server mode of operation.
+	 * True is encryption, false is authentication.
+	 */
+	public void setServerMode(boolean mode){
+		serverMode = mode;
 	}
 
 }

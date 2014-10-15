@@ -61,6 +61,12 @@ public class Gui {
 	private JTextArea displayLogClient;
 	
 	private static VPN myVPN = new VPN();
+	
+    char[] charArrS ={ 't', 'r', 'o', 'p', 'i', 'c', 'a', 'l' }; // testing
+    char[] charArrC ={ 'i', 's', 'l', 'a', 'n', 'd' }; // testing
+    
+    //private boolean DoneClientAuthentication = false; // true is done with authenticating, false is not
+    //private boolean DoneServerAuthentication = false; // true is done with authenticating, false is not
 
 	public Gui() {
 		prepareGUI();
@@ -240,10 +246,15 @@ public class Gui {
 					 * connected later on
 					 ***/
 					isServerConnected = true;
-
+			
+					// Assume that initially the mode is set to authentication.	
+					
 					// Call VPN package to set up the server
 					int portNumber = Integer.parseInt(serverPortNum);
 					myVPN.runServerThread(portNumber);
+					
+					// When done with authentication, set mode to encryption.
+					//myVPN.setServerMode(false);
 
 					statusLabel.setText("Port number: " + serverPortNum);
 				}
@@ -279,7 +290,10 @@ public class Gui {
 					statusLabel.setText("Sending server message: " + serverMsg);
 
 					myVPN.sendServerMessage();
-					System.out.println("You clicked SEND SERVER button");
+					//myVPN.sendAuthServerMessage(charArrS); // testing
+					
+					System.out.println("You clicked SEND SERVER button");				
+										
 				} else {
 					serverMsg = "";
 					statusLabel
@@ -391,9 +405,14 @@ public class Gui {
 					 ***/
 					isClientConnected = true;
 
+					// Assume that initially the mode is set to authentication.
+					
 					// Call VPN package to set up the client
 					int clientPortNumber = Integer.parseInt(clientPortNum);
 					myVPN.runClientThread(clientPortNumber, ipAdd);
+					
+					// When done with authentication, set mode to encryption.
+					//myVPN.setClientMode(false);
 
 					statusLabel.setText("IP: " + clientPortNum
 							+ " and host name: " + ipAdd + " Shared Key: "
@@ -430,6 +449,8 @@ public class Gui {
 					statusLabel.setText("Sending client message: " + clientMsg);
 
 					myVPN.sendClientMessage();
+					//myVPN.sendAuthClientMessage(charArrC); // testing
+					
 					System.out.println("You clicked SEND CLIENT button");
 				} else {
 					clientMsg = "";
