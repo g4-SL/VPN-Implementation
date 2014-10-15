@@ -1,6 +1,9 @@
 package encrytpion;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -13,11 +16,13 @@ public class encryption{
     public static void main(String[] args) throws IOException {
     	/*
     	while(true){
-    		
+    		//ecc4f1f4666ca02250aaf055185f1036
 	    	String plaintext = "sdlfkjsdflksdflksdfjklsdjflsdflksdflksdajfkldsjldsjflksdjfj";
-	    	String ciphertext = encrypt(plaintext,"12345");
+	    	System.out.println(md5(plaintext));
+	    	//System.out.println("Large binary number: "+Integer.parseInt("0000000010011100100101010011111101100000", 2));
+	    	String ciphertext = encrypt(plaintext,"999999999999999999999999999999");
 	    	System.out.println("Ciphertext:"+ciphertext+"\n");
-	    	System.out.println("Plaintext:"+decrypt(ciphertext,"12345"));
+	    	System.out.println("Plaintext:"+decrypt(ciphertext,"999999999999999999999999999999"));
 	    	System.out.println("=======================================================================================================");
 	    	//System.out.println("Brute Force: " +bruteF(ciphertext));
     	}*/
@@ -28,12 +33,13 @@ public class encryption{
 		String ciphertext = "";
 		//System.out.print("Please enter the key:\n");
 		ArrayList<Integer> hash = new ArrayList();
+		
 		hash(key_in,hash);
 		int c = IV;
 		int i,key;
 		for (i=0;i<plaintext.length();i++){
 			key = hash.get(i%hash.size());
-			System.out.println(i%hash.size());
+			//System.out.println(i%hash.size());
 			//System.out.println(Integer.toBinaryString(plaintext.charAt(i)));
 			//System.out.printf("Before XORed: %d\n" ,(int)plaintext.charAt(i));p
 			//System.out.printf("After XORed: %d\n",plaintext.charAt(i)^c);
@@ -65,7 +71,6 @@ public class encryption{
 			m ^= Integer.parseInt(ciphertext.substring(i-Z,i), 2);
 			plaintext = (char) m + plaintext;
 		}
-		
 		return plaintext;
 	}
 	
@@ -86,10 +91,26 @@ public class encryption{
 		return c_string;
 	}
 	
+	public static String md5(String str){
+		try{
+	        MessageDigest md = MessageDigest.getInstance("MD5");
+	        byte[] messageDigest = md.digest(str.getBytes());
+	        BigInteger number = new BigInteger(1, messageDigest);
+	        String hashtext = number.toString(16);
+	
+	        while (hashtext.length() < 32) {
+	            hashtext = "0" + hashtext;
+	        }
+	        return hashtext;
+		}
+        catch (NoSuchAlgorithmException e) {
+        	return "";
+        }
+	}
+	
 	public static void hash(String str, ArrayList<Integer> hash){
 		//System.out.println("String: "+str);
 		// Has to be length of 10
-		//hi :)
 		int i,j,tmp;
 		for (i=0;i<str.length();i++){
 			if (i == str.length() - 1)
@@ -97,6 +118,8 @@ public class encryption{
 			else
 				tmp = str.charAt(i) + str.charAt(i+1);
 			for (j=0;j<i;j++){
+				if (tmp + hash.get(j) > 100000000)
+					tmp -= 100000000;
 				tmp += hash.get(j);
 			}
 			hash.add(tmp);
@@ -114,10 +137,10 @@ public class encryption{
 			while (hash.size() > 10)
 				hash.remove(0);
 		}
-/*
+
 		System.out.println("Size of Hash: " + hash.size());
 		for (i=0;i<hash.size();i++)
-			System.out.println("Value of Hash: " + (int) hash.get(i));*/
+			System.out.println("Value of Hash: " + (int) hash.get(i));
 	}
 	
 	public static String bruteF(String ciphertext){
