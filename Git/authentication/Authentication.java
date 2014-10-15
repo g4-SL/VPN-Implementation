@@ -324,6 +324,16 @@ public class Authentication
 		return sessionKey.toString();
 	}
 	
+	public void setSessionID()
+	{
+		sessionID = SessionGen.nextSessionId();
+	}
+	
+	public String viewSessionID()
+	{
+		return sessionID;
+	}
+	
 	public String viewMySig()
 	{
 		return mySignatureSign.toString();
@@ -556,49 +566,77 @@ public class Authentication
 //
 	//TODO: add id necessary
 
-	public byte[] clientHelloMessage()
+	public char[] clientHelloMessage()
 	{
-		byte[] retVal = null;
+		char[] retVal = null;
 		String data = null;
 
 		sessionID = SessionGen.nextSessionId();
-		System.out.println("client sessionID: \"" + sessionID + "\"");
+	//	System.out.println("client sessionID: \"" + sessionID + "\"");
 		//byte[] publicKey = sendPublicKey().data;
 		data = sessionID;// + publicKey.toString();
 	//	System.out.println("client data: \"" + data + "\"");
 		
-		retVal = data.getBytes();
+	//	retVal = data.getBytes();
 	//	System.out.println("client hello retVal is: \"" + new String(retVal.data) + "\"");
+		
+		byte[] foo = data.getBytes();
+		retVal = new char[foo.length];
+		for(int i=0;i<foo.length;i++)
+		{
+			retVal[i] = (char) foo[i];
+		}
 		return retVal;
 	}
 	
-	public byte[] serverResponceToHello(byte[] hello)
+	public char[] serverResponceToHello(char[] hello)
 	{
-		byte[] retVal = null;
-		sessionID = SessionGen.nextSessionId();
-		System.out.println("server sessionID: \"" + sessionID + "\"");
-		//byte[] clientMessage = hello.data;
-		System.out.println("recovering client sessionID");
+		char[] retVal = null;
 		
-		//String clientSessionID = Arrays.copyOfRange(hello.data, 0, sessionID.length()).toString();
-		String clientSessionID = new String(hello);
-		System.out.println("server version of client sessionID: \"" + clientSessionID + "\"");
-		//DataFrame clientPublickKeyDataFrame = new DataFrame();
-		//System.out.println("recovering client public key");
+		//now in server
 		
-		//clientPublickKeyDataFrame.data = Arrays.copyOfRange(hello.data, sessionID.length(), hello.data.length);
-		
-		//System.out.println("inserting client public key to partnerPublicKey");
-		//receivePublicKey(clientPublickKeyDataFrame);	//insert the client publick key into the partnerPublicKey variable
-		//System.out.println("setting exponent");
+		String partnerSessionID = new String(hello);
+		setSessionID();
 		setExponent();
 		BigInteger Xb = getGAmodP();
+	//	String message = viewSessionID();
 		
-		String messageToClient = clientSessionID + Xb;
-		
-		System.out.println("encryting message to client: \"" + messageToClient + "\"");
-		
-		retVal = encryptAndSignData(messageToClient.getBytes());
+		//server
+		String message = partnerSessionID + Xb.toString();
+	//	System.out.println(message);
+		byte[] foo = encryptAndSignData(new String(message).getBytes());
+		byte[] fubar = arrayCat(viewSessionID().getBytes(), foo);
+	//	System.out.println(new String(fubar));
+		//message = new String(fubar);
+		retVal = new char[fubar.length];
+		for(int i=0;i<fubar.length;i++)
+		{
+			retVal[i] = (char) fubar[i];
+		}
+//		sessionID = SessionGen.nextSessionId();
+//		System.out.println("server sessionID: \"" + sessionID + "\"");
+//		//byte[] clientMessage = hello.data;
+//		System.out.println("recovering client sessionID");
+//		
+//		//String clientSessionID = Arrays.copyOfRange(hello.data, 0, sessionID.length()).toString();
+//		String clientSessionID = new String(hello);
+//		System.out.println("server version of client sessionID: \"" + clientSessionID + "\"");
+//		//DataFrame clientPublickKeyDataFrame = new DataFrame();
+//		//System.out.println("recovering client public key");
+//		
+//		//clientPublickKeyDataFrame.data = Arrays.copyOfRange(hello.data, sessionID.length(), hello.data.length);
+//		
+//		//System.out.println("inserting client public key to partnerPublicKey");
+//		//receivePublicKey(clientPublickKeyDataFrame);	//insert the client publick key into the partnerPublicKey variable
+//		//System.out.println("setting exponent");
+//		setExponent();
+//		BigInteger Xb = getGAmodP();
+//		
+//		String messageToClient = clientSessionID + Xb;
+//		
+//		System.out.println("encryting message to client: \"" + messageToClient + "\"");
+//		
+//		retVal = encryptAndSignData(messageToClient.getBytes());
 
 //		System.out.println("unencrypted message Size: " + messageToClient.length());
 //		byte[] partnerEncrypted = encrypt(partnerPubKey, messageToClient);
@@ -611,62 +649,129 @@ public class Authentication
 		return retVal;
 	}
 	
-	public byte[] clientResponceToServer(byte[] serverMessage) throws IllegalStateException
+	public char[] clientResponceToServer(char[] serverMessage) throws IllegalStateException
 	{
-		byte[] retVal = null;
-		String serverSessionID = new String(Arrays.copyOfRange(serverMessage, 0, sessionID.length()));
-		byte[] encryptedServerMessage = Arrays.copyOfRange(serverMessage, sessionID.length(), serverMessage.length);
-	
-//		byte[] serverSignedMessage = Arrays.copyOfRange(serverMessage.data, sessionID.length(), serverMessage.data.length);
-//		System.out.println("decrypting server message");
-//		System.out.println("serverSignedMessage Size: " + serverSignedMessage.length);
-//		byte[] serverMessageMyPubKey = decrypt(partnerSigKey, serverSignedMessage);
-//		System.out.println("server signature removed");
-//		byte[] decryptedServerMessage = decrypt(myPublicKeyPair.getPrivate(),serverMessageMyPubKey);
-
-		byte[] decryptedServerMessage = decryptAndVerifyData(encryptedServerMessage);
-		System.out.println("server message decrypted: \"" + new String(decryptedServerMessage) + "\"");
-		
-		if( null ==  decryptedServerMessage)
+		char[] retVal = null;
+		//client
+		//fubar = message.getBytes();
+		byte[] foo = new byte[serverMessage.length];
+		for(int i=0;i<serverMessage.length;i++)
 		{
-			throw new IllegalStateException("SessionID mismatch");
+			foo[i]=(byte) serverMessage[i];
 		}
-		System.out.println("session ID's match");
 		
-		//setExponent();
-		BigInteger Xb = new BigInteger(Arrays.copyOfRange(decryptedServerMessage, sessionID.length(), decryptedServerMessage.length));
-		sessionKey = getGAmodP(Xb);
+		String serverSessionID = new String(Arrays.copyOfRange(serverMessage, 0, viewSessionID().length()));
+		foo = Arrays.copyOfRange(foo, viewSessionID().length(),serverMessage.length);
+	//	System.out.println("clients version of server sessionID " + serverSessionID);
+		String res = new String(decryptAndVerifyData(foo));
+	//	System.out.println("clients version of server encrypted message " + res);
+		String serverCopyOfClientSessionID = res.substring(0, serverSessionID.length());
+	//	System.out.println("clients version of server version of sessionID " + serverCopyOfClientSessionID);
+	//	System.out.println("clients sessionID " + client.viewSessionID());
+		if(!serverCopyOfClientSessionID.equals(sessionID))
+		{
+			throw new IllegalStateException();
+		}
 		
+		String clientXb = res.substring(serverSessionID.length(), res.length() );;
+		//System.out.println("server and client Xb " + Xb.toString() + " " + clientXb);
+				
+		setExponent();
 		BigInteger Xa = getGAmodP();
+		sessionKey = getGAmodP(new BigInteger(clientXb));
 		
-		String messageToServer = serverSessionID + Xa;
-//		byte[] partnerEncrypted = encrypt(partnerPubKey, messageToServer);
-//		retVal.data = encrypt(mySigningKeyPair.getPrivate(),new String(partnerEncrypted));
+		String message = serverSessionID + Xa.toString();
+		foo = encryptAndSignData(message.getBytes());
+		
+		retVal = new char[foo.length];
+		for(int i=0;i<foo.length;i++)
+		{
+			retVal[i] = (char) foo[i];
+		}
+		
+//		String serverSessionID = new String(Arrays.copyOfRange(serverMessage, 0, sessionID.length()));
+//		byte[] encryptedServerMessage = Arrays.copyOfRange(serverMessage, sessionID.length(), serverMessage.length);
+//	
+////		byte[] serverSignedMessage = Arrays.copyOfRange(serverMessage.data, sessionID.length(), serverMessage.data.length);
+////		System.out.println("decrypting server message");
+////		System.out.println("serverSignedMessage Size: " + serverSignedMessage.length);
+////		byte[] serverMessageMyPubKey = decrypt(partnerSigKey, serverSignedMessage);
+////		System.out.println("server signature removed");
+////		byte[] decryptedServerMessage = decrypt(myPublicKeyPair.getPrivate(),serverMessageMyPubKey);
+//
+//		byte[] decryptedServerMessage = decryptAndVerifyData(encryptedServerMessage);
+//		System.out.println("server message decrypted: \"" + new String(decryptedServerMessage) + "\"");
 //		
-		
-		retVal = encryptAndSignData(messageToServer.getBytes());
-		
+//		if( null ==  decryptedServerMessage)
+//		{
+//			throw new IllegalStateException("SessionID mismatch");
+//		}
+//		System.out.println("session ID's match");
+//		
+//		//setExponent();
+//		BigInteger Xb = new BigInteger(Arrays.copyOfRange(decryptedServerMessage, sessionID.length(), decryptedServerMessage.length));
+//		sessionKey = getGAmodP(Xb);
+//		
+//		BigInteger Xa = getGAmodP();
+//		
+//		String messageToServer = serverSessionID + Xa;
+////		byte[] partnerEncrypted = encrypt(partnerPubKey, messageToServer);
+////		retVal.data = encrypt(mySigningKeyPair.getPrivate(),new String(partnerEncrypted));
+////		
+//		
+//		retVal = encryptAndSignData(messageToServer.getBytes());
+//		
 		return retVal;
 	}
 	
-	public boolean serverRecieveSecondClientMessage(byte[] clientMessage) throws IllegalStateException
+	public boolean serverRecieveSecondClientMessage(char[] clientMessage) throws IllegalStateException
 	{
 		boolean retVal = false;
-//		byte[] unsignedClientMessage = decrypt(partnerSigKey, clientMessage.data);
-//		byte[] decryptedClientMessage = decrypt(myPublicKeyPair.getPrivate(),unsignedClientMessage);
-		byte[] decryptedClientMessage = decryptAndVerifyData(clientMessage);
-		if(null == decryptedClientMessage)
+		
+		//server
+		byte[] foo = new byte[clientMessage.length];
+		for(int i=0;i<clientMessage.length;i++)
 		{
-			throw new IllegalStateException("SessionID mismatch");
+			foo[i]=(byte) clientMessage[i];
 		}
-		else
-		{	
-			BigInteger Xa = new BigInteger(Arrays.copyOfRange(decryptedClientMessage, sessionID.length(), decryptedClientMessage.length));
-			sessionKey = getGAmodP(Xa);
-			retVal = true;
+		byte[] fubar = decryptAndVerifyData(foo);
+	//	System.out.println("server decrypted client message " + new String(fubar));
+		String serverCopyOfClientVersionOfServerSessionID = new String(Arrays.copyOfRange(fubar, 0, viewSessionID().length()));
+	
+		if(!serverCopyOfClientVersionOfServerSessionID.equals(sessionID))
+		{
+			throw new IllegalStateException();
 		}
+		//	System.out.println("" + serverCopyOfClientVersionOfServerSessionID);
+		String serverXa = new String(Arrays.copyOfRange(fubar, viewSessionID().length(),fubar.length));
+	//	System.out.println("" + serverXa);
+		sessionKey = getGAmodP(new BigInteger(serverXa));
+		retVal = true;
+////		byte[] unsignedClientMessage = decrypt(partnerSigKey, clientMessage.data);
+////		byte[] decryptedClientMessage = decrypt(myPublicKeyPair.getPrivate(),unsignedClientMessage);
+//		byte[] decryptedClientMessage = decryptAndVerifyData(clientMessage);
+//		if(null == decryptedClientMessage)
+//		{
+//			throw new IllegalStateException("SessionID mismatch");
+//		}
+//		else
+//		{	
+//			BigInteger Xa = new BigInteger(Arrays.copyOfRange(decryptedClientMessage, sessionID.length(), decryptedClientMessage.length));
+//			sessionKey = getGAmodP(Xa);
+//			retVal = true;
+//		}
 		return retVal;
 	}
+	
+	public byte[] arrayCat(byte[] a, byte[] b)
+	{
+		byte[] c = new byte[a.length+b.length];
+		System.arraycopy(a, 0, c, 0, a.length);
+		System.arraycopy(b, 0, c, a.length, b.length);
+		return c;
+	}
+	
+	
 	
 	private int hcf(int a, int h)
 	{	//used for calculating co-primes

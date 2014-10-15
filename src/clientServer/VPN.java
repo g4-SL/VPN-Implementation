@@ -35,6 +35,11 @@ public class VPN{
 	private static PrintWriter out;
 
 	private static encryption en;
+	
+	private static boolean mode = false; // false is authentication mode, true is encryption mode
+	private static String authClientMsg;
+	private static String authServerMsg;
+	
 	public VPN(){
 		en = new encryption();
 		System.out.println("VPN package is speaking");
@@ -70,11 +75,22 @@ public class VPN{
 
 					// --------- Client handles its incoming data here ---------//
 					
+					
 					String received;
 					while( (received = input.readLine()) != null){
-						System.out.println("Client encrypted msg received: " + en.decrypt(received,gui.getSharedKeyClient()));
-						gui.displayMsgOnClient(en.decrypt(received,gui.getSharedKeyClient()));
-					}
+
+						if(mode == false){
+							System.out.println("Client is in Authenticaon mode");						
+							authClientMsg = received;
+							System.out.println("Client msg received (copy): " + authClientMsg);
+							System.out.println("Client msg received (original): " + received);
+						}
+						else{
+							System.out.println("Client is in Encryption mode");
+							System.out.println("Client encrypted msg received: " + en.decrypt(received,gui.getSharedKeyClient()));
+							gui.displayMsgOnClient(en.decrypt(received,gui.getSharedKeyClient()));
+						}
+					}				
 
 					// ----------- Close the client's socket and streams ----------//
 					//output.close();
@@ -118,10 +134,21 @@ public class VPN{
 					
 					String incomingData;
 					while ((incomingData = in.readLine()) != null) {
-						System.out.println("Server encrypted msg received: " + incomingData);
-						gui.displayMsgOnServer(en.decrypt(incomingData, gui.getSharedKeyServer()));
-					}
 
+						if(mode == false){
+							System.out.println("Server is in Authenticaon mode");
+							//System.out.println("Server msg received: " + incomingData);
+							authServerMsg = incomingData;
+							System.out.println("Server msg received (copy): " + authServerMsg);
+							System.out.println("Server msg received (original): " + incomingData);
+						}
+						else{
+							System.out.println("Server is in Encryption mode");
+							System.out.println("Server encrypted msg received: " + incomingData);
+							gui.displayMsgOnServer(en.decrypt(incomingData, gui.getSharedKeyServer()));
+						}
+					}
+					
 					// ----------- Close the server's socket and streams ---------//
 					in.close();
 					out.close();
@@ -162,17 +189,28 @@ public class VPN{
 	}
 	
 	/**
-	 * Send a byte array message from client to server through Authentication module.
+	 * Send a char array message from client to server through Authentication module.
 	 */
-	public void sendAuthClientMessage(byte[] byteArray){
-		outputClient.println("Replace with bytes");
+	public void sendAuthClientMessage(char[] charArr){		
+		outputClient.println(charArr);
+		System.out.println("Client sent auth message: " + charArr.toString());
 	}
 
 	/**
-	 * Send a byte array message from server to client through Authentication module.
+	 * Send a char array message from server to client through Authentication module.
 	 */
-	public void sendAuthServerMessage(byte[] byteArray){
-		out.println("Replace with bytes");
+	public void sendAuthServerMessage(char[] charArr){
+
+		out.println(charArr);
+		System.out.println("Server sent auth message: " + charArr.toString());
+	}
+	
+	public String getaAthClientString(){
+		return authClientMsg;				
+	}
+	
+	public String getAuthClientString(){
+		return authServerMsg;
 	}
 
 }
