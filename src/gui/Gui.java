@@ -35,14 +35,15 @@ public class Gui {
 	private JLabel 		statusLabel;
 	private JPanel 		controlPanel;
 	private JPanel 		userTypePanel;
+	private String		clientPortNum;
+	private String		serverPortNum;
 	private String		ipAdd;
-	private String		portNum;
-	private String		hostName;
 
 	private String		serverMsg;
 	private String		clientMsg;
 	private String		sharedKeyClient;
 	private String		sharedKeyServer;
+	private String		logMsg;
 
 	private boolean		isServerConnected;	//to check if message can be sent over
 	private boolean		isClientConnected;	//to check if message can be sent over
@@ -71,7 +72,7 @@ public class Gui {
         }); 
         
         controlPanel = new JPanel();
-        controlPanel.setLayout(new GridLayout(3,1));     
+        controlPanel.setLayout(new GridLayout(2,1));     
         
         userTypePanel = new JPanel();
         userTypePanel.setLayout(new FlowLayout());
@@ -89,7 +90,44 @@ public class Gui {
       panel.setSize(400,500);
 
       CardLayout layout = new CardLayout();
-      panel.setLayout(layout);        
+      panel.setLayout(layout);    
+      
+      //------------------ step panel --------------------------------//
+      
+      final JPanel stepPanel = new JPanel();
+      GroupLayout stepLayout = new GroupLayout(stepPanel);
+      stepLayout.setAutoCreateGaps(true);
+      stepLayout.setAutoCreateContainerGaps(true);
+
+      final JTextField displayLog = new JTextField(40);
+      final JButton stepContinueBtn = new JButton("Continue");
+      final JLabel stepLabel = new JLabel("PROGRAM LOG");
+
+      displayLog.setOpaque(false);
+      
+      stepLayout.setHorizontalGroup(stepLayout.createSequentialGroup()
+		 .addGroup(stepLayout.createParallelGroup(
+			 GroupLayout.Alignment.LEADING)
+	         .addComponent(stepLabel)
+	         .addComponent(displayLog)
+	         .addComponent(stepContinueBtn)
+         )      
+      );
+      
+      stepLayout.setVerticalGroup(stepLayout.createSequentialGroup()
+         .addComponent(stepLabel)
+         .addComponent(displayLog)
+         .addComponent(stepContinueBtn)                               
+      );
+      
+      stepPanel.setLayout(stepLayout);
+      
+      stepContinueBtn.addActionListener(new ActionListener() {
+    	  public void actionPerformed(ActionEvent e) {
+    		  displayLog.setText(logMsg);
+		 }          
+      });
+      
       
       //---------------- message box ---------------------------------------------//
 
@@ -100,9 +138,10 @@ public class Gui {
       final JTextField serverMsgTextField = new JTextField(40);
       final JLabel serverDisplayMsgLabel = new JLabel("Received message");
       
-      serverMsgPanel.setLayout(new GridLayout(6,1));
+      serverMsgPanel.setLayout(new GridLayout(7,1));
       displayMsgFieldOnServer = new JTextField(40);
       displayMsgFieldOnServer.setText("Wait for received message to display here");
+      displayMsgFieldOnServer.setOpaque(false);
       serverMsgPanel.add(serverHeaderLabel);
       serverMsgPanel.add(serverMsgLabel);
       serverMsgPanel.add(serverMsgTextField);
@@ -117,14 +156,16 @@ public class Gui {
       final JTextField clientMsgTextField = new JTextField(40);
       final JLabel clientDisplayMsgLabel = new JLabel("Received message");
 
-      clientMsgPanel.setLayout(new GridLayout(6,1));
+      clientMsgPanel.setLayout(new GridLayout(7,1));
       displayMsgFieldOnClient = new JTextField(40);
       displayMsgFieldOnClient.setText("Wait for received message to display here");
+      displayMsgFieldOnClient.setOpaque(false);
       clientMsgPanel.add(clientHeaderLabel);
       clientMsgPanel.add(clientMsgLabel);
       clientMsgPanel.add(clientMsgTextField);
       clientMsgPanel.add(clientDisplayMsgLabel);
       clientMsgPanel.add(displayMsgFieldOnClient);
+      
       
       
 
@@ -135,25 +176,25 @@ public class Gui {
       serverLayout.setAutoCreateGaps(true);
       serverLayout.setAutoCreateContainerGaps(true);
       
-      JLabel portNumLabel = new JLabel("Enter port number");
-      final JTextField portNumText = new JTextField(40);
+      JLabel serverPortNumLabel = new JLabel("Enter port number");
+      final JTextField serverPortNumText = new JTextField(40);
       JLabel sharedKeyServerLabel = new JLabel("Enter shared key");
       final JTextField sharedKeyServerText = new JTextField(20);
       JButton connectServerBtn = new JButton("Connect");
-      JButton keyServerBtn = new JButton("Set key");
+//      JButton keyServerBtn = new JButton("Set key");
       JButton sendServerMessageBtn = new JButton("Send");
       JButton cancelServerBtn = new JButton("Cancel");
       
       serverLayout.setHorizontalGroup(serverLayout.createSequentialGroup()
 		 .addGroup(serverLayout.createParallelGroup(
 			 GroupLayout.Alignment.LEADING)
-	         .addComponent(portNumLabel)
-	         .addComponent(portNumText)
+	         .addComponent(serverPortNumLabel)
+	         .addComponent(serverPortNumText)
 	         .addComponent(sharedKeyServerLabel)
 	         .addComponent(sharedKeyServerText)
 	         .addGroup(serverLayout.createSequentialGroup()
         		 .addComponent(connectServerBtn)
-        		 .addComponent(keyServerBtn)
+//        		 .addComponent(keyServerBtn)
                  .addComponent(sendServerMessageBtn)
                  .addComponent(cancelServerBtn)
     		 )
@@ -162,25 +203,25 @@ public class Gui {
       );
       
       serverLayout.setVerticalGroup(serverLayout.createSequentialGroup()
-         .addComponent(portNumLabel)
-         .addComponent(portNumText)
+         .addComponent(serverPortNumLabel)
+         .addComponent(serverPortNumText)
          .addComponent(sharedKeyServerLabel)
 	     .addComponent(sharedKeyServerText)
          	.addGroup(serverLayout.createParallelGroup(
                GroupLayout.Alignment.LEADING)
         		 .addComponent(connectServerBtn)
-        		 .addComponent(keyServerBtn)
+//        		 .addComponent(keyServerBtn)
                  .addComponent(sendServerMessageBtn)
                  .addComponent(cancelServerBtn)
             )
-            .addComponent(serverMsgPanel)	                                
+            .addComponent(serverMsgPanel)	                              
       );
       
       connectServerBtn.addActionListener(new ActionListener() {
     	  public void actionPerformed(ActionEvent e) {
-    		  portNum = portNumText.getText();
+    		  serverPortNum = serverPortNumText.getText();
     		  sharedKeyServer = sharedKeyServerText.getText();
-    		  if(portNum.equals(""))
+    		  if(serverPortNum.equals(""))
 				  statusLabel.setText("port number is missing");
     		  //else if(sharedKeyServer.equals(""))
 				//  statusLabel.setText("shared key is missing");
@@ -189,10 +230,10 @@ public class Gui {
         		  isServerConnected = true;	
         		  
         		  // Call VPN package to set up the server
-        		  int portNumber = Integer.parseInt(portNum);
+        		  int portNumber = Integer.parseInt(serverPortNum);
         		  myVPN.runServerThread(portNumber);
         		  
-        		  statusLabel.setText("Port number: " + portNum);
+        		  statusLabel.setText("Port number: " + serverPortNum);
     		  }
 		 }          
       });
@@ -203,21 +244,21 @@ public class Gui {
       cancelServerBtn.addActionListener(new ActionListener() {
     	  public void actionPerformed(ActionEvent e) {
     		  isServerConnected = false;	
-    		  portNumText.setText("");
+    		  serverPortNumText.setText("");
     		  sharedKeyServerText.setText("");
     		  statusLabel.setText("Cancel server");
 		 }          
       });
       
-      keyServerBtn.addActionListener(new ActionListener() {
-    	  public void actionPerformed(ActionEvent e) {
-    		  sharedKeyServer = sharedKeyServerText.getText();
-    	  }
-      });
+//      keyServerBtn.addActionListener(new ActionListener() {
+//    	  public void actionPerformed(ActionEvent e) {
+//    		  sharedKeyServer = sharedKeyServerText.getText();
+//    	  }
+//      });
       
       sendServerMessageBtn.addActionListener(new ActionListener() {
     	  public void actionPerformed(ActionEvent e) {
-    		  portNumText.setText("");
+    		  serverPortNumText.setText("");
     		  //sharedKeyServerText.setText("");
     		  
     		  if(isServerConnected){
@@ -243,29 +284,29 @@ public class Gui {
       clientLayout.setAutoCreateGaps(true);
       clientLayout.setAutoCreateContainerGaps(true);
       
-      JLabel ipAddLabel = new JLabel("Enter IP address");
-      final JTextField ipAddText = new JTextField(40);      
-      JLabel hostNameLabel = new JLabel("Enter host name");
-      final JTextField hostNameText = new JTextField(20);
+      JLabel clientPortNumLabel = new JLabel("Enter port number");
+      final JTextField clientPortNumTextField = new JTextField(40);      
+      JLabel ipAddLabel = new JLabel("Enter IP Address");
+      final JTextField ipAddTextField = new JTextField(20);
       JLabel sharedKeyClientLabel = new JLabel("Enter shared key");
       final JTextField sharedKeyClientText = new JTextField(20);
       JButton connectClientBtn = new JButton("Connect");
-      JButton keyClientBtn = new JButton("Set key");
+//      JButton keyClientBtn = new JButton("Set key");
       JButton sendClientMessageBtn = new JButton("Send");
       JButton cancelClientBtn = new JButton("Cancel");
       
       clientLayout.setHorizontalGroup(clientLayout.createSequentialGroup()
 		 .addGroup(clientLayout.createParallelGroup(
 			 GroupLayout.Alignment.LEADING)
+	         .addComponent(clientPortNumLabel)
+	         .addComponent(clientPortNumTextField)
 	         .addComponent(ipAddLabel)
-	         .addComponent(ipAddText)
-	         .addComponent(hostNameLabel)
-	         .addComponent(hostNameText)
+	         .addComponent(ipAddTextField)
 	         .addComponent(sharedKeyClientLabel)
 	         .addComponent(sharedKeyClientText)
 	         .addGroup(clientLayout.createSequentialGroup()
         		 .addComponent(connectClientBtn)
-        		 .addComponent(keyClientBtn)
+//        		 .addComponent(keyClientBtn)
         		 .addComponent(sendClientMessageBtn)   
                  .addComponent(cancelClientBtn)           
     		 )
@@ -274,16 +315,16 @@ public class Gui {
       );
       
       clientLayout.setVerticalGroup(clientLayout.createSequentialGroup()
+         .addComponent(clientPortNumLabel)
+         .addComponent(clientPortNumTextField)
          .addComponent(ipAddLabel)
-         .addComponent(ipAddText)
-         .addComponent(hostNameLabel)
-         .addComponent(hostNameText)
+         .addComponent(ipAddTextField)
          .addComponent(sharedKeyClientLabel)
 	     .addComponent(sharedKeyClientText)
          	.addGroup(clientLayout.createParallelGroup(
                GroupLayout.Alignment.LEADING)
                .addComponent(connectClientBtn)
-               .addComponent(keyClientBtn)
+//               .addComponent(keyClientBtn)
                .addComponent(sendClientMessageBtn)   
                .addComponent(cancelClientBtn)      
             ) 
@@ -292,12 +333,12 @@ public class Gui {
       
       connectClientBtn.addActionListener(new ActionListener() {
     	  public void actionPerformed(ActionEvent e) {
-    		  ipAdd = ipAddText.getText();
-    		  hostName = hostNameText.getText();
+    		  clientPortNum = clientPortNumTextField.getText();
+    		  ipAdd = ipAddTextField.getText();
     		  sharedKeyClient = sharedKeyClientText.getText();
-    		  if(ipAdd.equals(""))
+    		  if(clientPortNum.equals(""))
 				  statusLabel.setText("IP address is missing");
-    		  else if(hostName.equals(""))
+    		  else if(ipAdd.equals(""))
 				  statusLabel.setText("host name is missing");
     		  //else if(sharedKeyClient.equals(""))
 				//  statusLabel.setText("shared key is missing");
@@ -306,10 +347,10 @@ public class Gui {
 				  isClientConnected = true;	
 				  
 	    		  // Call VPN package to set up the client
-	    		  int ipNumber = Integer.parseInt(ipAdd);
-	    		  myVPN.runClientThread(ipNumber, hostName);	
+	    		  int clientPortNumber = Integer.parseInt(clientPortNum);
+	    		  myVPN.runClientThread(clientPortNumber, ipAdd);	
 	    		  
-				  statusLabel.setText("IP: " + ipAdd + " and host name: " + hostName + " Shared Key: " + sharedKeyClient);
+				  statusLabel.setText("IP: " + clientPortNum + " and host name: " + ipAdd + " Shared Key: " + sharedKeyClient);
     		  }
 		 }          
       });
@@ -317,23 +358,23 @@ public class Gui {
       cancelClientBtn.addActionListener(new ActionListener() {
     	  public void actionPerformed(ActionEvent e) {
     		  isClientConnected = false;	
-    		  ipAddText.setText("");
-    		  hostNameText.setText("");
+    		  clientPortNumTextField.setText("");
+    		  ipAddTextField.setText("");
     		  sharedKeyClientText.setText("");
     		  statusLabel.setText("Cancel client");
 		 }          
       });
       
-      keyClientBtn.addActionListener(new ActionListener() {
-    	  public void actionPerformed(ActionEvent e) {
-    		  sharedKeyClient = sharedKeyClientText.getText();
-    	  }          
-      });
+//      keyClientBtn.addActionListener(new ActionListener() {
+//    	  public void actionPerformed(ActionEvent e) {
+//    		  sharedKeyClient = sharedKeyClientText.getText();
+//    	  }          
+//      });
       
       sendClientMessageBtn.addActionListener(new ActionListener() {
     	  public void actionPerformed(ActionEvent e) {
-    		  ipAddText.setText("");
-    		  hostNameText.setText("");
+    		  clientPortNumTextField.setText("");
+    		  ipAddTextField.setText("");
     		  sharedKeyClient = sharedKeyClientText.getText();
     		  //sharedKeyClientText.setText("");
     		  
@@ -389,20 +430,20 @@ public class Gui {
       userTypePanel.add(listComboScrollPane);
       userTypePanel.add(selectBtn);
 	  controlPanel.add(panel);
-//	  controlPanel.add(messagePanel);
-	  controlPanel.add(statusLabel);
+	  controlPanel.add(stepPanel);
+//	  controlPanel.add(statusLabel);
 
       mainFrame.setVisible(true);  
    }
 
 
 
-	public String getIpAdd(){
-		return ipAdd;
+	public String getClientPortNum(){
+		return clientPortNum;
 	}
 
-	public String getHostName(){
-		return hostName;
+	public String getIpAdd(){
+		return ipAdd;
 	}
 	
 	public String getServerMsg(){
@@ -419,6 +460,10 @@ public class Gui {
 	
 	public void displayMsgOnClient(String input){
 		displayMsgFieldOnClient.setText(input);
+	}
+	
+	public void setLogMsg(String input){
+		logMsg = input;
 	}
 
 	public String getSharedKeyClient(){
