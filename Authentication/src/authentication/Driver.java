@@ -1,6 +1,18 @@
 package authentication;
 
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.util.Arrays;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 public class Driver 
 {
@@ -17,13 +29,14 @@ public class Driver
 	{
 		do
 		{
-		Authentication client =  new Authentication();
+	/*	Authentication client =  new Authentication();
 		Authentication server =  new Authentication();
 		
-		System.out.println(SessionGen.nextSessionId());
+//		System.out.println(SessionGen.nextSessionId());
 //		System.out.println(System.getProperty("user.name"));
 		//System.out.println(client());
-		client.setExponent();
+		
+		client.setExponent();	//set exponent for DH
 		server.setExponent();
 		
 		//int a = ;
@@ -44,19 +57,24 @@ public class Driver
 //			System.out.println("Session Key Mismatch");
 //		}
 		
-		client.generateKeyPair();
+		client.generateKeyPair();	//generate keyPairs
 		server.generateKeyPair();
+		
+		//get public keys
 		DataFrame clientPubKey = client.sendPubPublicKey();
 		DataFrame serverPubKey = server.sendPubPublicKey();
 
+		//get public signing keys
 		DataFrame clientSigKey = client.sendSigPublicKey();
 		DataFrame serverSigKey = server.sendSigPublicKey();
 //		//the public key is ~33 bytes long
 	
 		//Exchange the public keys
 		server.receivePublicKey(clientPubKey);
-		server.receiveSigKey(clientSigKey);
 		client.receivePublicKey(serverPubKey);
+		
+		//exchange signature keys, a Signature object is created
+		server.receiveSigKey(clientSigKey);
 		client.receiveSigKey(serverSigKey);
 		
 		
@@ -70,35 +88,183 @@ public class Driver
 		String paddedMessage = "this is a test";
 		//paddedMessage = new String(client.padMessage(1,"this is a test"));
 		System.out.println("the padded message is: \"" + paddedMessage + "\"");
-		System.out.println("the padded message of length is: \"" + paddedMessage.length() + "\"");
-		DataFrame testMessage = client.encryptWithPartnerPublicKey(paddedMessage);
-		byte[] originalEncryption = testMessage.data;
-		System.out.println("the encrypted message of length: \"" + testMessage.data.length + "\"");
-		testMessage = client.encryptWithMyPrivateKey(new String(testMessage.data));
+	//	System.out.println("the padded message of length is: \"" + paddedMessage.length() + "\"");
+		DataFrame testMessage = new DataFrame();
+		testMessage.data = paddedMessage.getBytes();
+	//	testMessage = client.encryptWithPartnerPublicKey(new String(testMessage.data));
+	//	byte[] originalEncryption = testMessage.data;
+	//	System.out.println("the encrypted message of length: \"" + testMessage.data.length + "\"");
+	//	testMessage = client.encryptWithMyPrivateKey(new String(testMessage.data));
 		//System.out.println("the encrypted message is: \"" + new String(testMessage.data) + "\"");
-		System.out.println("the signed message of length: \"" + testMessage.data.length + "\"");
-		
+	//	System.out.println("the signed message of length: \"" + testMessage.data.length + "\"");
+	
+		testMessage.data = client.signMessage(testMessage.data); 
+	
 		byte[] decryptedMessage;
-		decryptedMessage = server.decryptWithPartnerPublicKey(testMessage);
-		System.out.println("the unsigned message of length: \"" + decryptedMessage.length + "\"");
-		testMessage.data = decryptedMessage;
+		if(server.verifyMessage(testMessage.data))
+		{
+			System.out.println("the message is verified");
+			decryptedMessage = testMessage.data;
+		}
+		else
+		{
+			System.out.println("the message is not verified");
+			//break;
+			decryptedMessage = testMessage.data;
+		}
+	//	decryptedMessage = server.decryptWithPartnerPublicKey(testMessage);
+	//	System.out.println("the unsigned message of length: \"" + decryptedMessage.length + "\"");
+	//	testMessage.data = decryptedMessage;
 		//if(!decryptedMessage.equals(originalEncryption))
 		{
 			//System.out.println("testMessage.data does not match original encryption");
-			for(int i=0;i<decryptedMessage.length;i++)
+	//		for(int i=0;i<decryptedMessage.length;i++)
 			{
-				if(decryptedMessage[i]!=originalEncryption[i])
+	//			if(decryptedMessage[i]!=originalEncryption[i])
 				{
-					System.out.println(i + " " + decryptedMessage[i] + " " + originalEncryption[i]);
+	//				System.out.println(i + " " + decryptedMessage[i] + " " + originalEncryption[i]);
 				}
 			}
 			//break;
 		}
-		decryptedMessage = server.decryptWithMyPrivateKey(testMessage);
+	//	decryptedMessage = server.decryptWithMyPrivateKey(testMessage);
 		System.out.println("the unencrypted message of length: \"" + testMessage.data.length + "\"");
 		System.out.println("the server decrypted message is: \"" + new String(decryptedMessage) + "\"");
 		
+		System.out.println(client.viewSigKey());
+		System.out.println(server.viewPartnerSigKey());
 		
+		System.out.println(client.viewMySig());
+		System.out.println(server.viewPartnerSig());
+	*/	
+			
+		Authentication client = new Authentication();
+		Authentication server = new Authentication();
+		
+		//generate keys
+		System.out.println("generate keys");
+		client.generateKeyPairs();
+		server.generateKeyPairs();
+		
+		//get publicDatakey
+		System.out.println("get publicDatakey");
+		byte[] clientKey = client.sendPublicDataKey();
+		byte[] serverKey = server.sendPublicDataKey();
+			
+		//Receive partnerDatakey
+		System.out.println("Receive partnerDatakey");
+		client.receivePartnerDataKey(serverKey);
+		server.receivePartnerDataKey(clientKey);
+		
+		//get PublicSignatureKey
+		System.out.println("get PublicSignatureKey");
+		clientKey = client.sendPublicSignatureKey();
+		serverKey = server.sendPublicSignatureKey();
+					
+		//Receive partnerDatakey
+		System.out.println("Receive PublicSignatureKey");
+		client.receivePartnerSignatureKey(serverKey);
+		server.receivePartnerSignatureKey(clientKey);
+			
+		//get FinalKey
+		System.out.println("get FinalKey");
+		clientKey = client.sendPublicFinalKey();
+		serverKey = server.sendPublicFinalKey();
+					
+		//Receive FinalKey
+		System.out.println("Receive FinalKey");
+		client.receivePartnerFinalKey(serverKey);
+		server.receivePartnerFinalKey(clientKey);
+					
+		
+	//	client.viewPublicKeys();
+	//	server.viewPartnerPublicKeys();
+		
+//		String message = "this is a test";
+//		System.out.println("send message");
+//		byte[] encryptedMessage = client.encryptAndSignData(message.getBytes());
+//		System.out.println("decrypte message");
+//		byte[] recoveredMessage = server.decryptAndVerifyData(encryptedMessage);
+//		System.out.println(new String(recoveredMessage));
+		
+		byte[] clientServerMessage = client.clientHelloMessage();
+		clientServerMessage = server.serverResponceToHello(clientServerMessage);
+		clientServerMessage = client.clientResponceToServer(clientServerMessage);
+		server.serverRecieveSecondClientMessage(clientServerMessage);
+		
+		System.out.println(client.getSessionKey());
+		System.out.println(server.getSessionKey());
+		/*
+		try 
+		{
+			int rsaKeySize = 1024;
+			KeyPairGenerator kpg;
+			SecureRandom secRand = new SecureRandom();
+			kpg = KeyPairGenerator.getInstance("RSA");
+			kpg.initialize(rsaKeySize, secRand);
+			KeyPair keyData = kpg.generateKeyPair();
+			KeyPair keyFoo = kpg.generateKeyPair();
+			kpg.initialize((2*rsaKeySize + 88), new SecureRandom());	//this key is 2*n+88 where n is the size of the smaller keys
+			KeyPair keyFinal = kpg.generateKeyPair();
+			
+			
+			Signature sigSign =  Signature.getInstance("SHA1withRSA");
+			sigSign.initSign(keyFoo.getPrivate(),secRand);
+			Signature sigVer =  Signature.getInstance("SHA1withRSA");
+			sigVer.initVerify(keyFoo.getPublic());
+			
+			String text = "this is a test";
+			
+			Cipher rsa = Cipher.getInstance("RSA");
+			rsa.init(Cipher.ENCRYPT_MODE, keyData.getPublic());
+			byte[] dataEncrypted = rsa.doFinal(text.getBytes());
+			
+			byte[] buffer = dataEncrypted;//text.getBytes();
+			sigSign.update(buffer);
+			byte[] realSig = sigSign.sign();
+			System.out.println(realSig.length);
+			
+			//Concatenate data
+			byte[] message = new byte[buffer.length + realSig.length];
+			System.arraycopy(buffer, 0, message, 0, buffer.length);
+			System.arraycopy(realSig, 0, message, buffer.length, realSig.length);
+			
+			rsa.init(Cipher.ENCRYPT_MODE,keyFinal.getPublic());
+			byte[] encryptedMessage = rsa.doFinal(message);
+			
+			
+			rsa.init(Cipher.DECRYPT_MODE, keyFinal.getPrivate());
+			message = rsa.doFinal(encryptedMessage);
+			
+			buffer = Arrays.copyOfRange(message, 0, rsaKeySize/8);
+			realSig = Arrays.copyOfRange(message, rsaKeySize/8, message.length);
+			
+			sigVer.update(buffer);
+			boolean result = sigVer.verify(realSig);
+			if(result)
+			{
+				System.out.println("the message is verified");
+			//	System.out.println("the message is: " + new String(buffer));
+			}
+			else
+			{
+				System.out.println("the message not is verified");
+				break;
+			}
+			
+			rsa.init(Cipher.DECRYPT_MODE, keyData.getPrivate());
+			byte[] decryptedMessage = rsa.doFinal(buffer);
+			
+			System.out.println("the message is: " + new String(decryptedMessage));
+			
+		} 
+		catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	*/
+	//	System.out.println(server.verifyMessage(client.signMessage(new String("foo").getBytes())));
 		
 //		String foo = "this is a test";
 //		byte[] fubar = foo.getBytes();

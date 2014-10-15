@@ -1,19 +1,17 @@
 package authentication;
 
 
-import java.awt.Frame;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
@@ -23,7 +21,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.naming.PartialResultException;
 
 
 public class Authentication 
@@ -31,15 +28,30 @@ public class Authentication
 	private SessionIDgen SessionGen = new SessionIDgen();
 	private SecureRandom secRand = new SecureRandom();
 	private int exponent = 0;
-	private KeyPair myPublicKeyPair = null;
-	private KeyPair mySigningKeyPair = null;
-	private PublicKey partnerPubKey = null;
-	private PublicKey partnerSigKey = null;
+//	private KeyPair myPublicKeyPair = null;
+//	private KeyPair mySigningKeyPair = null;
+//	private PublicKey partnerPubKey = null;
+//	private PublicKey partnerSigKey = null;
 	private String sessionID = null;
 	private BigInteger sessionKey = null;
+//	private Signature mySignature = null;
+//	private Signature partnerSignature = null;
 	
-	private final static int rsaPubKeySize = 800;
-	private final static int rsaSigKeySize = 1024;
+	private Signature mySignatureSign =  null;
+	private Signature partnerSignatureVerify =  null;
+	
+	
+	private final static int rsaKeySize = 1024;
+	private KeyPair keyPairData = null;
+	private KeyPair keyPairSignature = null;
+	private KeyPair keyPairFinal = null;
+	
+	private PublicKey partnerDataKey = null;
+	private PublicKey partnerSignatureKey = null;
+	private PublicKey partnerFinalKey = null;
+	
+	
+//	private final static int rsaSigKeySize = 1024;
 	//the signing key needs to be 11 bytes (88 bits) larger than the public key
 	
 //	private final static int pValue = 47;
@@ -120,236 +132,456 @@ public class Authentication
 		//NOTE: is is not an issue if a negative exponent is generated
 	}
 	
-	public DataFrame sendPubPublicKey()
+	public byte[] sendPublicKeys()
 	{
-		DataFrame myFrame = new DataFrame();
-		myFrame.data = myPublicKeyPair.getPublic().getEncoded();
+		byte[] setOfKeys = null;
 		
-		return myFrame;
+		int length  = 0;
+		int keyPairDataLength = keyPairData.getPublic().getEncoded().length;
+		int keyPairSignatureLength = keyPairSignature.getPublic().getEncoded().length;
+		int keyPairFinalLength = keyPairFinal.getPublic().getEncoded().length;
+		length = keyPairDataLength + keyPairSignatureLength + keyPairFinalLength;
+		byte[] keySet = new byte[ length ];
+		System.arraycopy(keyPairData.getPublic().getEncoded(), 0, keySet, 0, keyPairDataLength);
+		System.arraycopy(keyPairSignature.getPublic().getEncoded(), 0, keySet, keyPairDataLength, keyPairSignatureLength);
+		System.arraycopy(keyPairFinal.getPublic().getEncoded(), 0, keySet, keyPairSignatureLength, keyPairFinalLength);		
+		setOfKeys = keySet;
+		
+		return setOfKeys;
 	}
 	
-	public DataFrame sendSigPublicKey()
+	public byte[] sendPublicDataKey()
 	{
-		DataFrame myFrame = new DataFrame();
-		myFrame.data = mySigningKeyPair.getPublic().getEncoded();
-		
-		return myFrame;
+		return keyPairData.getPublic().getEncoded();
 	}
 	
-	public void receivePublicKey(DataFrame receivedFrame)
+	public byte[] sendPublicSignatureKey()
 	{
-		byte[] rPubKey = receivedFrame.data;
-		X509EncodedKeySpec ks = new X509EncodedKeySpec(rPubKey);
+		return keyPairSignature.getPublic().getEncoded();
+	}
+	
+	public byte[] sendPublicFinalKey()
+	{
+		return keyPairFinal.getPublic().getEncoded();
+	}
+	
+	public void receivePublicKeys(byte[] receivedKeys)
+	{
+		//byte[] rPubKey = receivedFrame.data;
+		int keyPairDataLength = keyPairData.getPublic().getEncoded().length;
+		int keyPairSignatureLength = keyPairSignature.getPublic().getEncoded().length;
+		int keyPairFinalLength = keyPairFinal.getPublic().getEncoded().length;
+		
+		byte[] partnerDataKeyRaw = Arrays.copyOfRange(receivedKeys, 0, keyPairDataLength);
+		byte[] partnerSignatureKeyRaw = Arrays.copyOfRange(receivedKeys, keyPairDataLength, keyPairSignatureLength);
+	//	byte[] partnerFinalKeyRaw = Arrays.copyOfRange(receivedKeys, keyPairSignatureLength, keyPairFinalLength);
+		
+		X509EncodedKeySpec ksDataKey = new X509EncodedKeySpec(partnerDataKeyRaw);
+		X509EncodedKeySpec ksSignatureKey = new X509EncodedKeySpec(partnerSignatureKeyRaw);
+	//	X509EncodedKeySpec ksFinalKey = new X509EncodedKeySpec(partnerFinalKeyRaw);
 		KeyFactory kf;
 		try 
 		{
 			kf = KeyFactory.getInstance("RSA");
-			partnerPubKey = kf.generatePublic(ks);
+			partnerDataKey = kf.generatePublic(ksDataKey);
+			partnerSignatureKey = kf.generatePublic(ksSignatureKey);
+	//		partnerFinalKey = kf.generatePublic(ksFinalKey);
+			
+			partnerSignatureVerify =  Signature.getInstance("SHA1withRSA");
+			partnerSignatureVerify.initVerify(partnerSignatureKey);
+			
 		} 
-		catch (NoSuchAlgorithmException e) 
+		catch (NoSuchAlgorithmException | InvalidKeySpecException | InvalidKeyException e) 
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.out.println("error reading keys");
 		} 
-		catch (InvalidKeySpecException e) 
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 	}
 	
-	public void receiveSigKey(DataFrame receivedFrame)
+	public void receivePartnerDataKey(byte[] receivedKey)
 	{
-		byte[] rPubKey = receivedFrame.data;
-		X509EncodedKeySpec ks = new X509EncodedKeySpec(rPubKey);
+		X509EncodedKeySpec ksDataKey = new X509EncodedKeySpec(receivedKey);
 		KeyFactory kf;
 		try 
 		{
 			kf = KeyFactory.getInstance("RSA");
-			partnerSigKey = kf.generatePublic(ks);
+			partnerDataKey = kf.generatePublic(ksDataKey);
+			
 		} 
-		catch (NoSuchAlgorithmException e) 
+		catch (NoSuchAlgorithmException | InvalidKeySpecException e) 
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.out.println("error reading data key");
 		} 
-		catch (InvalidKeySpecException e) 
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 	}
 	
-	public String viewPrivateKey()
+	public void receivePartnerSignatureKey(byte[] receivedKey)
 	{
-		return myPublicKeyPair.getPrivate().toString();
+		X509EncodedKeySpec ksSignatureKey = new X509EncodedKeySpec(receivedKey);
+		KeyFactory kf;
+		try 
+		{
+			kf = KeyFactory.getInstance("RSA");
+			partnerSignatureKey = kf.generatePublic(ksSignatureKey);
+			
+			partnerSignatureVerify =  Signature.getInstance("SHA1withRSA");
+			partnerSignatureVerify.initVerify(partnerSignatureKey);
+			
+		} 
+		catch (NoSuchAlgorithmException | InvalidKeySpecException | InvalidKeyException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.out.println("error reading Signature key");
+		} 
+		
 	}
+	
+	public void receivePartnerFinalKey(byte[] receivedKey)
+	{
+		X509EncodedKeySpec ksFinalKey = new X509EncodedKeySpec(receivedKey);
+		KeyFactory kf;
+		try 
+		{
+			kf = KeyFactory.getInstance("RSA");
+			partnerFinalKey = kf.generatePublic(ksFinalKey);
+		} 
+		catch (NoSuchAlgorithmException | InvalidKeySpecException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.out.println("error reading keys");
+		} 
+		
+	}
+	
+//	public void receiveSigKey(DataFrame receivedFrame)
+//	{
+//		byte[] rPubKey = receivedFrame.data;
+//		X509EncodedKeySpec ks = new X509EncodedKeySpec(rPubKey);
+//		KeyFactory kf;
+//		try 
+//		{
+//			kf = KeyFactory.getInstance("RSA");
+//			partnerSigKey = kf.generatePublic(ks);
+//			partnerSignature = Signature.getInstance("SHA1withRSA");
+//			partnerSignature.initVerify(partnerSigKey);
+//		} 
+//		catch (NoSuchAlgorithmException | InvalidKeySpecException | InvalidKeyException e) 
+//		{
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} 
+//		
+//	}
+	
+//	public String viewPrivateKey()
+//	{
+//		return myPublicKeyPair.getPrivate().toString();
+//	}
 	
 	public String viewExponent()
 	{
 		return Integer.valueOf(exponent).toString();
 	}
 	
-	public String viewPublicKey()
+	public void viewPublicKeys()
 	{
-		return myPublicKeyPair.getPublic().toString();
+		System.out.println("keyPairData");
+		System.out.println(keyPairData.getPublic().toString());
+		System.out.println("keyPairSignature");
+		System.out.println(keyPairSignature.getPublic().toString());
+		System.out.println("keyPairFinal");
+		System.out.println(keyPairFinal.getPublic().toString());
 	}
 	
-	public String viewPartnerPublicKey()
+//	public String viewSigKey()
+//	{
+//		return mySigningKeyPair.getPublic().toString();
+//	}
+	
+	public void viewPartnerPublicKeys()
 	{
-		return partnerPubKey.toString();
+		System.out.println("partnerDataKey");
+		System.out.println(partnerDataKey.toString());
+		System.out.println("partnerSignatureKey");
+		System.out.println(partnerSignatureKey.toString());
+		System.out.println("partnerFinalKey");
+		System.out.println(partnerFinalKey.toString());
 	}
+	
+//	public String viewPartnerSigKey()
+//	{
+//		return partnerSigKey.toString();
+//	}
 	
 	public String getSessionKey()
 	{
 		return sessionKey.toString();
 	}
 	
-	public void generateKeyPair()
+	public String viewMySig()
 	{
-		KeyPairGenerator kpg1;
-		KeyPairGenerator kpg2;
+		return mySignatureSign.toString();
+	}
+	
+	public String viewPartnerSig()
+	{
+		return partnerSignatureVerify.toString();
+	}
+	
+	public void generateKeyPairs()
+	{
+		//KeyPairGenerator kpg;
+		//KeyPairGenerator kpg2;
 		try 
 		{
-			kpg1 = KeyPairGenerator.getInstance("RSA");
-			kpg1.initialize(rsaPubKeySize, secRand);
-			myPublicKeyPair = kpg1.generateKeyPair();
-			kpg2 = KeyPairGenerator.getInstance("RSA");
-			kpg2.initialize(rsaSigKeySize, secRand);
-			mySigningKeyPair = kpg2.generateKeyPair();
+			
+			KeyPairGenerator kpg;
+			//SecureRandom secRand = new SecureRandom();
+			kpg = KeyPairGenerator.getInstance("RSA");
+			kpg.initialize(rsaKeySize, new SecureRandom());
+			keyPairData = kpg.generateKeyPair();
+			kpg.initialize(rsaKeySize, new SecureRandom());
+			keyPairSignature = kpg.generateKeyPair();
+			kpg.initialize((2*rsaKeySize + 88), new SecureRandom());	//this key is 2*n+88 where n is the size of the smaller keys
+			keyPairFinal = kpg.generateKeyPair();
+			
+			
+			mySignatureSign =  Signature.getInstance("SHA1withRSA");
+			mySignatureSign.initSign(keyPairSignature.getPrivate(),secRand);
+			
+			//do this once we have the partnerSignaturePublicKey
+		//	Signature sigVer =  Signature.getInstance("SHA1withRSA");
+		//	sigVer.initVerify(keyPairSignature.getPublic());
+			
+//			kpg = KeyPairGenerator.getInstance("RSA");
+//			kpg.initialize(rsaKeySize, new SecureRandom());
+//			myPublicKeyPair = kpg1.generateKeyPair();
+//			kpg2 = KeyPairGenerator.getInstance("RSA");
+//			kpg2.initialize(rsaSigKeySize, secRand);
+//			mySigningKeyPair = kpg2.generateKeyPair();
+//			
+//			
+//			mySignature =  Signature.getInstance("SHA1withRSA");
+//			mySignature.initSign(mySigningKeyPair.getPrivate());
+//			
 		//	PrivateKey priv = myKeyPair.getPrivate();
 		//	PublicKey pub = myKeyPair.getPublic();
 		//	System.out.println(pub.toString());
 		//	System.out.println(priv.toString());
-		} catch (NoSuchAlgorithmException e) {
+		} catch (NoSuchAlgorithmException | InvalidKeyException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			System.out.println("No RSA algorithem found");
+			System.out.println("problem generating keys");
 		}
 	}
 	
-	public byte[] padMessage(int keySize, String message )
+//	public byte[] padMessage(int keySize, String message )
+//	{
+//		byte[] retVal;
+//		int size;
+//		String temp = new String(message);
+//		if(keySize==1)
+//		{
+//			size = rsaPubKeySize;
+//		}
+//		else
+//		{
+//			size = rsaSigKeySize;
+//		}
+//		for(int i=message.length();i<(size/8 -11);i++)
+//		{
+//			temp = temp + "0";
+//		}
+//		retVal = temp.getBytes();
+//		
+//		return retVal;
+//	}
+	
+	public byte[] encryptAndSignData(byte[] data)
 	{
-		byte[] retVal;
-		int size;
-		String temp = new String(message);
-		if(keySize==1)
-		{
-			size = rsaPubKeySize;
-		}
-		else
-		{
-			size = rsaSigKeySize;
-		}
-		for(int i=message.length();i<(size/8 -11);i++)
-		{
-			temp = temp + "0";
-		}
-		retVal = temp.getBytes();
+		Cipher rsa;
+		byte[] encryptedMessage = null;
 		
-		return retVal;
-	}
-	
-	public DataFrame encryptWithMyPrivateKey(String text)
-	{//signing key (large key)
-		DataFrame retVal = new DataFrame();
-		//System.out.println(mySigningKeyPair.getPrivate().toString());
-		retVal.data = encrypt(mySigningKeyPair.getPrivate(), text);
-		return retVal;
-	}
-	
-	public DataFrame encryptWithPartnerPublicKey(String text)
-	{//public key (small key)
-		DataFrame retVal = new DataFrame();
-		//System.out.println(partnerPubKey.toString());
-		retVal.data = encrypt(partnerPubKey, text);
-		return retVal;
-	}
-	
-	public byte[] decryptWithPartnerPublicKey(DataFrame message)
-	{//signing key (large key)
-		byte[] retVal = null;
-		//System.out.println(partnerSigKey.toString());
-		retVal = decrypt(partnerSigKey, message.data);
-		return retVal;
-	}
-	
-	public byte[] decryptWithMyPrivateKey(DataFrame message)
-	{//public key (small key)
-		byte[] retVal = null;
-		//System.out.println(myPublicKeyPair.getPrivate().toString());
-		retVal = decrypt(myPublicKeyPair.getPrivate(), message.data);
-		return retVal;
-	}
-	
-	private static byte[] encrypt(Key encryptionKey, String text)
-	{
-		byte[] retVal = null;
-		Cipher rsa;
-		try 
-		{
-			//System.out.println("the text is " + text.length() + " bytes long");
-			rsa = Cipher.getInstance("RSA");
-			rsa.init(Cipher.ENCRYPT_MODE, encryptionKey);
-			retVal = rsa.doFinal(text.getBytes());
-		} 
-		catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) 
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.out.println("error in rsa encryption");
-		}
-		return retVal;
-	}
-	
-	private static byte[] decrypt(Key decryptionKey, byte[] buffer)
-	{
-		byte[] retVal = null;
-		Cipher rsa;
-		//System.out.println(decryptionKey.toString());
 		try 
 		{
 			rsa = Cipher.getInstance("RSA");
-			rsa.init(Cipher.DECRYPT_MODE, decryptionKey);
-			byte[] utf8 = rsa.doFinal(buffer);
-			retVal = utf8;
-			//retVal = new String(utf8,"UTF8");//.getBytes();
+			rsa.init(Cipher.ENCRYPT_MODE, partnerDataKey);
+			//System.out.println(new String(data));
+			byte[] dataEncrypted = rsa.doFinal(data);
+			
+			byte[] buffer = dataEncrypted;//text.getBytes();
+			
+			mySignatureSign.update(buffer);
+			byte[] realSig = mySignatureSign.sign();
+			
+			//Concatenate data
+			byte[] message = new byte[buffer.length + realSig.length];
+			System.arraycopy(buffer, 0, message, 0, buffer.length);
+			System.arraycopy(realSig, 0, message, buffer.length, realSig.length);
+			
+			//encrypt concatenated data
+			rsa.init(Cipher.ENCRYPT_MODE,partnerFinalKey);
+			encryptedMessage = rsa.doFinal(message);
 		} 
-		catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException e) 
+		catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | SignatureException e) 
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			System.out.println("error in rsa decryption");
 		}
-		return retVal;
+		return encryptedMessage;
 	}
 	
-	public DataFrame clientHelloMessage()
+	public byte[] decryptAndVerifyData(byte[] encryptedMessage)
 	{
-		DataFrame retVal = new DataFrame();
+		byte[] text = null;
+		
+		do
+		{
+			Cipher rsa;
+			try 
+			{
+				rsa = Cipher.getInstance("RSA");
+				rsa.init(Cipher.DECRYPT_MODE, keyPairFinal.getPrivate());
+				
+				byte[] message = rsa.doFinal(encryptedMessage);
+				
+				byte[] buffer = Arrays.copyOfRange(message, 0, rsaKeySize/8);
+				byte[] realSig = Arrays.copyOfRange(message, rsaKeySize/8, message.length);
+				
+				partnerSignatureVerify.update(buffer);
+				boolean result = partnerSignatureVerify.verify(realSig);
+				if(!result)
+				{
+					System.out.println("the message not is verified");
+					break;
+				//	System.out.println("the message is: " + new String(buffer));
+				}
+				
+				rsa.init(Cipher.DECRYPT_MODE, keyPairData.getPrivate());
+				text = rsa.doFinal(buffer);
+				
+		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | SignatureException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		}while(false);
+		return text;
+	}
+	
+	
+//	private static byte[] encrypt(Key encryptionKey, String text)
+//	{
+//		byte[] retVal = null;
+//		Cipher rsa;
+//		try 
+//		{
+//			//System.out.println("the text is " + text.length() + " bytes long");
+//			rsa = Cipher.getInstance("RSA");
+//			rsa.init(Cipher.ENCRYPT_MODE, encryptionKey);
+//			retVal = rsa.doFinal(text.getBytes());
+//		} 
+//		catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) 
+//		{
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			System.out.println("error in rsa encryption");
+//		}
+//		return retVal;
+//	}
+	
+//	private static byte[] decrypt(Key decryptionKey, byte[] buffer)
+//	{
+//		byte[] retVal = null;
+//		Cipher rsa;
+//		//System.out.println(decryptionKey.toString());
+//		try 
+//		{
+//			rsa = Cipher.getInstance("RSA");
+//			rsa.init(Cipher.DECRYPT_MODE, decryptionKey);
+//			//byte[] utf8 = rsa.doFinal(buffer);
+//			retVal = rsa.doFinal(buffer);
+//			//retVal = utf8;
+//			//retVal = new String(utf8,"UTF8");//.getBytes();
+//		} 
+//		catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException e) 
+//		{
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			System.out.println("error in rsa decryption");
+//		}
+//		return retVal;
+//	}
+//	
+//	private byte[] signData(byte[] buffer)
+//	{
+//		byte[] retVal = null;
+//		
+//		try 
+//		{
+//			mySignature.update(buffer);
+//			retVal = mySignature.sign();
+//		} 
+//		catch (SignatureException e) 
+//		{
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//		return retVal;
+//	}
+//	
+//	private boolean verifyData(byte[] buffer)
+//	{
+//		boolean retVal = false;
+//		
+//		try 
+//		{
+//			partnerSignature.update(buffer);
+//			retVal = partnerSignature.verify(buffer);
+//		} 
+//		catch (SignatureException e) 
+//		{
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//		return retVal;
+//	}
+//
+	//TODO: add id necessary
+
+	public byte[] clientHelloMessage()
+	{
+		byte[] retVal = null;
 		String data = null;
 
 		sessionID = SessionGen.nextSessionId();
-	//	System.out.println("client sessionID: \"" + sessionID + "\"");
+		System.out.println("client sessionID: \"" + sessionID + "\"");
 		//byte[] publicKey = sendPublicKey().data;
 		data = sessionID;// + publicKey.toString();
 	//	System.out.println("client data: \"" + data + "\"");
 		
-		retVal.data = data.getBytes();
+		retVal = data.getBytes();
 	//	System.out.println("client hello retVal is: \"" + new String(retVal.data) + "\"");
 		return retVal;
 	}
 	
-	public DataFrame serverResponceToHello(DataFrame hello)
+	public byte[] serverResponceToHello(byte[] hello)
 	{
-		DataFrame retVal = new DataFrame();
+		byte[] retVal = null;
 		sessionID = SessionGen.nextSessionId();
 		System.out.println("server sessionID: \"" + sessionID + "\"");
 		//byte[] clientMessage = hello.data;
 		System.out.println("recovering client sessionID");
 		
 		//String clientSessionID = Arrays.copyOfRange(hello.data, 0, sessionID.length()).toString();
-		String clientSessionID = new String(hello.data);
+		String clientSessionID = new String(hello);
 		System.out.println("server version of client sessionID: \"" + clientSessionID + "\"");
 		//DataFrame clientPublickKeyDataFrame = new DataFrame();
 		//System.out.println("recovering client public key");
@@ -359,39 +591,43 @@ public class Authentication
 		//System.out.println("inserting client public key to partnerPublicKey");
 		//receivePublicKey(clientPublickKeyDataFrame);	//insert the client publick key into the partnerPublicKey variable
 		//System.out.println("setting exponent");
-		//setExponent();
+		setExponent();
 		BigInteger Xb = getGAmodP();
 		
 		String messageToClient = clientSessionID + Xb;
 		
-		System.out.println("encryting message to client");
+		System.out.println("encryting message to client: \"" + messageToClient + "\"");
 		
+		retVal = encryptAndSignData(messageToClient.getBytes());
 
-		System.out.println("unencrypted message Size: " + messageToClient.length());
-		byte[] partnerEncrypted = encrypt(partnerPubKey, messageToClient);
-		System.out.println("encrypted Size: " + partnerEncrypted.length);
-		System.out.println("signing message to client");
-		byte[] signedMessageToClient = encrypt(mySigningKeyPair.getPrivate(),new String(partnerEncrypted));
-		System.out.println("serverSignedMessage Size: " + signedMessageToClient.length);
-		messageToClient = sessionID + new String(signedMessageToClient);
-		retVal.data = messageToClient.getBytes();
+//		System.out.println("unencrypted message Size: " + messageToClient.length());
+//		byte[] partnerEncrypted = encrypt(partnerPubKey, messageToClient);
+//		System.out.println("encrypted Size: " + partnerEncrypted.length);
+//		System.out.println("signing message to client");
+//		byte[] signedMessageToClient = encrypt(mySigningKeyPair.getPrivate(),new String(partnerEncrypted));
+//		System.out.println("serverSignedMessage Size: " + signedMessageToClient.length);
+//		messageToClient = sessionID + new String(signedMessageToClient);
+//		retVal.data = messageToClient.getBytes();
 		return retVal;
 	}
 	
-	public DataFrame clientResponceToServer(DataFrame serverMessage) throws IllegalStateException
+	public byte[] clientResponceToServer(byte[] serverMessage) throws IllegalStateException
 	{
-		DataFrame retVal = new DataFrame();
-		String serverSessionID = new String(Arrays.copyOfRange(serverMessage.data, 0, sessionID.length()));
-		//DataFrame serverSignedMessage = new DataFrame();
-		byte[] serverSignedMessage = Arrays.copyOfRange(serverMessage.data, sessionID.length(), serverMessage.data.length);
-		System.out.println("decrypting server message");
-		System.out.println("serverSignedMessage Size: " + serverSignedMessage.length);
-		byte[] serverMessageMyPubKey = decrypt(partnerSigKey, serverSignedMessage);
-		System.out.println("server signature removed");
-		byte[] decryptedServerMessage = decrypt(myPublicKeyPair.getPrivate(),serverMessageMyPubKey);
-		System.out.println("server message decrypted");
+		byte[] retVal = null;
+		String serverSessionID = new String(Arrays.copyOfRange(serverMessage, 0, sessionID.length()));
+		byte[] encryptedServerMessage = Arrays.copyOfRange(serverMessage, sessionID.length(), serverMessage.length);
+	
+//		byte[] serverSignedMessage = Arrays.copyOfRange(serverMessage.data, sessionID.length(), serverMessage.data.length);
+//		System.out.println("decrypting server message");
+//		System.out.println("serverSignedMessage Size: " + serverSignedMessage.length);
+//		byte[] serverMessageMyPubKey = decrypt(partnerSigKey, serverSignedMessage);
+//		System.out.println("server signature removed");
+//		byte[] decryptedServerMessage = decrypt(myPublicKeyPair.getPrivate(),serverMessageMyPubKey);
+
+		byte[] decryptedServerMessage = decryptAndVerifyData(encryptedServerMessage);
+		System.out.println("server message decrypted: \"" + new String(decryptedServerMessage) + "\"");
 		
-		if( !(new String(Arrays.copyOfRange(decryptedServerMessage, 0, sessionID.length())).equals(sessionID)) )
+		if( null ==  decryptedServerMessage)
 		{
 			throw new IllegalStateException("SessionID mismatch");
 		}
@@ -404,26 +640,32 @@ public class Authentication
 		BigInteger Xa = getGAmodP();
 		
 		String messageToServer = serverSessionID + Xa;
-		byte[] partnerEncrypted = encrypt(partnerPubKey, messageToServer);
-		retVal.data = encrypt(mySigningKeyPair.getPrivate(),new String(partnerEncrypted));
+//		byte[] partnerEncrypted = encrypt(partnerPubKey, messageToServer);
+//		retVal.data = encrypt(mySigningKeyPair.getPrivate(),new String(partnerEncrypted));
+//		
 		
+		retVal = encryptAndSignData(messageToServer.getBytes());
 		
 		return retVal;
 	}
 	
-	public void serverRecieveSecondClientMessage(DataFrame clientMessage) throws IllegalStateException
+	public boolean serverRecieveSecondClientMessage(byte[] clientMessage) throws IllegalStateException
 	{
-		byte[] unsignedClientMessage = decrypt(partnerSigKey, clientMessage.data);
-		byte[] decryptedClientMessage = decrypt(myPublicKeyPair.getPrivate(),unsignedClientMessage);
-		
-		if(!(new String(Arrays.copyOfRange(decryptedClientMessage, 0, sessionID.length())).equals(sessionID)))
+		boolean retVal = false;
+//		byte[] unsignedClientMessage = decrypt(partnerSigKey, clientMessage.data);
+//		byte[] decryptedClientMessage = decrypt(myPublicKeyPair.getPrivate(),unsignedClientMessage);
+		byte[] decryptedClientMessage = decryptAndVerifyData(clientMessage);
+		if(null == decryptedClientMessage)
 		{
 			throw new IllegalStateException("SessionID mismatch");
 		}
-		
-		BigInteger Xa = new BigInteger(Arrays.copyOfRange(decryptedClientMessage, sessionID.length(), decryptedClientMessage.length));
-		sessionKey = getGAmodP(Xa);
-		
+		else
+		{	
+			BigInteger Xa = new BigInteger(Arrays.copyOfRange(decryptedClientMessage, sessionID.length(), decryptedClientMessage.length));
+			sessionKey = getGAmodP(Xa);
+			retVal = true;
+		}
+		return retVal;
 	}
 	
 	private int hcf(int a, int h)
