@@ -61,6 +61,9 @@ public class Gui {
 	private JTextArea displayLogClient;
 	
 	private static VPN myVPN = new VPN();
+	
+    char[] charArrS ={ 'd', 'o', 'm', 'i', 'n', 'o' }; // testing
+    char[] charArrC ={ 'c', 'h', 'o', 'c', 'o' }; // testing
 
 	public Gui() {
 		prepareGUI();
@@ -241,6 +244,9 @@ public class Gui {
 					 ***/
 					isServerConnected = true;
 
+					// Set Mode
+					myVPN.setServerMode(true);
+					
 					// Call VPN package to set up the server
 					int portNumber = Integer.parseInt(serverPortNum);
 					myVPN.runServerThread(portNumber);
@@ -279,7 +285,10 @@ public class Gui {
 					statusLabel.setText("Sending server message: " + serverMsg);
 
 					myVPN.sendServerMessage();
-					System.out.println("You clicked SEND SERVER button");
+					//myVPN.sendAuthServerMessage(charArrS);
+					
+					System.out.println("You clicked SEND SERVER button");				
+										
 				} else {
 					serverMsg = "";
 					statusLabel
@@ -391,6 +400,9 @@ public class Gui {
 					 ***/
 					isClientConnected = true;
 
+					// Set Mode
+					myVPN.setClientMode(true);
+					
 					// Call VPN package to set up the client
 					int clientPortNumber = Integer.parseInt(clientPortNum);
 					myVPN.runClientThread(clientPortNumber, ipAdd);
@@ -430,6 +442,8 @@ public class Gui {
 					statusLabel.setText("Sending client message: " + clientMsg);
 
 					myVPN.sendClientMessage();
+					//myVPN.sendAuthClientMessage(charArrC);
+					
 					System.out.println("You clicked SEND CLIENT button");
 				} else {
 					clientMsg = "";
