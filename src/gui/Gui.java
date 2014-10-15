@@ -62,8 +62,11 @@ public class Gui {
 	
 	private static VPN myVPN = new VPN();
 	
-    char[] charArrS ={ 'd', 'o', 'm', 'i', 'n', 'o' }; // testing
-    char[] charArrC ={ 'c', 'h', 'o', 'c', 'o' }; // testing
+    char[] charArrS ={ 't', 'r', 'o', 'p', 'i', 'c', 'a', 'l' }; // testing
+    char[] charArrC ={ 'i', 's', 'l', 'a', 'n', 'd' }; // testing
+    
+    //private boolean DoneClientAuthentication = false; // true is done with authenticating, false is not
+    //private boolean DoneServerAuthentication = false; // true is done with authenticating, false is not
 
 	public Gui() {
 		prepareGUI();
@@ -243,13 +246,15 @@ public class Gui {
 					 * connected later on
 					 ***/
 					isServerConnected = true;
-
-					// Set Mode
-					myVPN.setServerMode(true);
+			
+					// Assume that initially the mode is set to authentication.	
 					
 					// Call VPN package to set up the server
 					int portNumber = Integer.parseInt(serverPortNum);
 					myVPN.runServerThread(portNumber);
+					
+					// When done with authentication, set mode to encryption.
+					//myVPN.setServerMode(false);
 
 					statusLabel.setText("Port number: " + serverPortNum);
 				}
@@ -285,7 +290,7 @@ public class Gui {
 					statusLabel.setText("Sending server message: " + serverMsg);
 
 					myVPN.sendServerMessage();
-					//myVPN.sendAuthServerMessage(charArrS);
+					//myVPN.sendAuthServerMessage(charArrS); // testing
 					
 					System.out.println("You clicked SEND SERVER button");				
 										
@@ -400,12 +405,14 @@ public class Gui {
 					 ***/
 					isClientConnected = true;
 
-					// Set Mode
-					myVPN.setClientMode(true);
+					// Assume that initially the mode is set to authentication.
 					
 					// Call VPN package to set up the client
 					int clientPortNumber = Integer.parseInt(clientPortNum);
 					myVPN.runClientThread(clientPortNumber, ipAdd);
+					
+					// When done with authentication, set mode to encryption.
+					//myVPN.setClientMode(false);
 
 					statusLabel.setText("IP: " + clientPortNum
 							+ " and host name: " + ipAdd + " Shared Key: "
@@ -442,7 +449,7 @@ public class Gui {
 					statusLabel.setText("Sending client message: " + clientMsg);
 
 					myVPN.sendClientMessage();
-					//myVPN.sendAuthClientMessage(charArrC);
+					//myVPN.sendAuthClientMessage(charArrC); // testing
 					
 					System.out.println("You clicked SEND CLIENT button");
 				} else {

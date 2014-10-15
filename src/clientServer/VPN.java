@@ -36,8 +36,8 @@ public class VPN{
 
 	private static encryption en;
 	
-	private static boolean serverMode = false; // true is encryption mode, false is authentication mode
-	private static boolean clientMode = false; // true is encryption mode, false is authentication mode
+	private static boolean serverMode = true; // true is authentication mode, false is encryption mode
+	private static boolean clientMode = true; // true is authentication mode, false is encryption mode
 	private static String authClientMsg;
 	private static String authServerMsg;
 	
@@ -75,13 +75,12 @@ public class VPN{
 					outputClient = new PrintWriter(client.getOutputStream(), true);
 
 					// --------- Client handles its incoming data here ---------//
-					
-					
+							
 					String received;
 					while( (received = input.readLine()) != null){
 
-						if(clientMode == false){
-							System.out.println("Client is in Authenticaon mode");						
+						if(clientMode == true){
+							System.out.println("Client is in Authentication mode");						
 							authClientMsg = received;
 							System.out.println("Client msg received (copy): " + authClientMsg);
 							System.out.println("Client msg received (original): " + received);
@@ -136,8 +135,8 @@ public class VPN{
 					String incomingData;
 					while ((incomingData = in.readLine()) != null) {
 
-						if(serverMode == false){
-							System.out.println("Server is in Authenticaon mode");							
+						if(serverMode == true){
+							System.out.println("Server is in Authentication mode");							
 							authServerMsg = incomingData;
 							System.out.println("Server msg received (copy): " + authServerMsg);
 							System.out.println("Server msg received (original): " + incomingData);
@@ -194,7 +193,6 @@ public class VPN{
 	 */
 	public void sendAuthClientMessage(char[] charArr){		
 		outputClient.println(charArr);
-		System.out.println("Client sent auth message: " + charArr.toString());
 	}
 
 	/**
@@ -202,9 +200,7 @@ public class VPN{
 	 * @Module: Authentication.
 	 */
 	public void sendAuthServerMessage(char[] charArr){
-
 		out.println(charArr);
-		System.out.println("Server sent auth message: " + charArr.toString());
 	}
 	
 	/**
