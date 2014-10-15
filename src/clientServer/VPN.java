@@ -1,7 +1,6 @@
 package clientServer;
 
 import gui.Gui;
-
 import encrytpion.encryption;
 
 import java.io.BufferedReader;
@@ -12,6 +11,7 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 /*
  * Author: Group 8
@@ -34,9 +34,9 @@ public class VPN{
 	private static BufferedReader in;
 	private static PrintWriter out;
 
-	private static encryption en = new encryption();
-
+	private static encryption en;
 	public VPN(){
+		en = new encryption();
 		System.out.println("VPN package is speaking");
 	}
 
@@ -146,6 +146,9 @@ public class VPN{
 	 */
 	public void sendClientMessage(){
 		outputClient.println(en.encrypt(gui.getClientMsg(), gui.getSharedKeyClient()));
+		gui.setLogMsg(en.returnLog_en(),en.returnLog_de());
+		gui.clearLogMsgClient();
+		gui.clearLogMsgServer();
 	}
 
 	/**
@@ -153,6 +156,9 @@ public class VPN{
 	 */
 	public void sendServerMessage(){
 		out.println(en.encrypt(gui.getServerMsg(),gui.getSharedKeyServer()));
+		gui.setLogMsg(en.returnLog_de(),en.returnLog_en());
+		gui.clearLogMsgClient();
+		gui.clearLogMsgServer();
 	}
 
 }

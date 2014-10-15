@@ -11,6 +11,9 @@ import java.util.Scanner;
 
 //CBC
 public class encryption{
+    private static ArrayList<String> log_en = new ArrayList<String>();
+    private static ArrayList<String> log_de = new ArrayList<String>();
+    
 	public static int IV = 'A';
 	public static int Z = 40;//40
     public static void main(String[] args) throws IOException {
@@ -29,12 +32,16 @@ public class encryption{
     }
     
 	public static String encrypt(String plaintext, String key_in){
+		log_en.clear();
 		//Scanner in = new Scanner(System.in);
 		String ciphertext = "";
 		//System.out.print("Please enter the key:\n");
 		ArrayList<Integer> hash = new ArrayList();
 		
-		hash(key_in,hash);
+		log_en.add("Key: "+key_in+"\n");
+		hash(md5(key_in),hash);
+		log_en.add("md5(key): "+ md5(key_in)+"\n");
+		log_en.add("hash(md5(key)): "+hash+"\n");
 		int c = IV;
 		int i,key;
 		for (i=0;i<plaintext.length();i++){
@@ -47,17 +54,23 @@ public class encryption{
 			//System.out.printf("After shifting: %d\n",c);
 			//System.out.println(c_string(c));
 			ciphertext += c_string(c);
+			log_en.add("shift(plaintext("+i+")) with key "+key+" : "+c+"\nCiphertext: "+ciphertext+"\n");
 		}
-	
-		return c_string(IV)+ciphertext;
+		ciphertext = c_string(IV)+ciphertext;
+		log_en.add("Add IV to ciphertext: "+ciphertext+"\n");
+		
+		return ciphertext;
 	}
 	
 	public static String decrypt(String ciphertext, String key_in){
+		log_de.clear();
 		String plaintext = "";
 		//Scanner in = new Scanner(System.in);
 		//System.out.print("Please enter the key:");
 		ArrayList<Integer> hash = new ArrayList();
-		hash(key_in,hash);
+		hash(md5(key_in),hash);
+		log_de.add("md5(key): "+ md5(key_in)+"\n");
+		log_de.add("hash(md5(key)): "+hash+"\n");
 		int key,m = 0;
 
 		for (int i = ciphertext.length()-Z,j= hash.size()-((ciphertext.length()/Z)%hash.size()-1); i >=Z; i-= Z,j++){
@@ -69,6 +82,7 @@ public class encryption{
 			//System.out.printf("%d XOR %d\n",m,Integer.parseInt(ciphertext.substring(i-7,i), 2));
 			m ^= Integer.parseInt(ciphertext.substring(i-Z,i), 2);
 			plaintext = (char) m + plaintext;
+			log_de.add("shift(ciphertext("+i+"-"+(i+Z)+")) with key "+key+" : "+m+"\nPlaintext: "+plaintext+"\n");
 		}
 		return plaintext;
 	}
@@ -137,9 +151,12 @@ public class encryption{
 				hash.remove(0);
 		}
 
-		System.out.println("Size of Hash: " + hash.size());
-		for (i=0;i<hash.size();i++)
-			System.out.println("Value of Hash: " + (int) hash.get(i));
+		//System.out.println("Size of Hash: " + hash.size());
+		String hash_str = "";
+		for (i=0;i<hash.size();i++){
+			//System.out.println("Value of Hash: " + (int) hash.get(i));
+			hash_str += Integer.toString(hash.get(i));
+		}
 	}
 	
 	public static String bruteF(String ciphertext){
@@ -161,4 +178,10 @@ public class encryption{
 		return plaintext;
 	}
 	
+	public ArrayList<String> returnLog_en(){
+		return log_en;
+	}
+	public ArrayList<String> returnLog_de(){
+		return log_de;
+	}
 }
