@@ -15,13 +15,15 @@ public class encryption{
     private static ArrayList<String> log_de = new ArrayList<String>();
     
     private static String key;
+    private static int en_counter = 0;
+    private static int de_counter = 0;
 	public static int Z = 40;//40
 	public static int SPLIT = 7;
 	
     public static void main(String[] args) throws IOException {
     	
     	while(true){
-	    	String plaintext = "ABCFdsabcdSg;,df gvflkdgmdf;lzgmflkmlsdmflsdmfosdfldsjflkdsjflsdjfl;ksdajflksadffkl;mldfgm;ldfl;,fdgde";
+	    	String plaintext = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC";
 	    	key = "99999999999999999999999999999999999999999999999999999999999999999999999sNFkjsDNfkjdsnfmlsdfnsdlkfmdsllkjf9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999";
 	       	String ciphertext = encrypt(plaintext,key);
 	    	System.out.println("Ciphertext:"+ciphertext+"\n");
@@ -31,6 +33,7 @@ public class encryption{
     }
     
 	public static String encrypt(String plaintext, String key_in){
+		en_counter = 0;
 		log_en.clear();
 		log_en.add("Key: "+key_in+"\n");
 		ArrayList<Integer> hash = new ArrayList();
@@ -56,18 +59,18 @@ public class encryption{
 	}
 	
 	public static String en_loop(String plaintext, ArrayList<Integer> hash){
-		//Scanner in = new Scanner(System.in);
 		String ciphertext = "";
-		//System.out.print("Please enter the key:\n");
-		
-		int IV = 0 + (int)(Math.random() * ((10000000 - 0) + 1));
+
+		int IV = 0 + (int)(Math.random() * ((Math.pow(2, 30) - 0) + 1));
 		int c = IV;
 		int i,key;
 		for (i=0;i<plaintext.length();i++){
 			key = hash.get(i%hash.size());
 			c = shift(plaintext.charAt(i)^c,key,1);
 			ciphertext += c_string(c);
-			log_en.add("shift(plaintext("+i+")) with key "+key+" : "+c+"\nCiphertext: "+ciphertext+"\n");
+			
+			log_en.add("shift(plaintext("+en_counter+")) with key "+key+" : "+c+"\nCiphertext: "+ciphertext+"\n");
+			en_counter++;
 		}
 		ciphertext = c_string(IV)+ciphertext;
 		log_en.add("Add IV to ciphertext: "+ciphertext+"\n");
@@ -76,6 +79,7 @@ public class encryption{
 	}
 	
 	public static String decrypt(String ciphertext, String key_in){
+		de_counter = 0;
 		log_de.clear();
 		ArrayList<Integer> hash = new ArrayList();
 		hash(md5(key_in),hash);
@@ -87,12 +91,16 @@ public class encryption{
 		String tmp = "";
 		for ( i = 0 ; i< ciphertext.length();i+=(SPLIT+1)*Z){
 			if (i+(SPLIT+1)*Z < ciphertext.length()){
+				de_counter += i+(SPLIT+1)*Z;
 				tmp = de_loop(ciphertext.substring(i,i+(SPLIT+1)*Z),hash);
 			}
 			else{
+				de_counter = ciphertext.length();
 				tmp = de_loop(ciphertext.substring(i,ciphertext.length()),hash);
 			}
 			plaintext+=tmp;
+			log_de.add("Plaintext: "+plaintext+"\n");
+			
 		}
 		
 		return plaintext;
@@ -108,7 +116,9 @@ public class encryption{
 			m = shift(Integer.parseInt(ciphertext.substring(i,i+Z), 2),key,2);
 			m ^= Integer.parseInt(ciphertext.substring(i-Z,i), 2);
 			plaintext = (char) m + plaintext;
-			log_de.add("shift(ciphertext("+i+"-"+(i+Z)+")) with key "+key+" : "+m+"\nPlaintext: "+plaintext+"\n");
+			
+			de_counter -= Z;
+			log_de.add("shift(ciphertext("+de_counter+"-"+(de_counter+Z)+")) with key "+key+" : "+m+"\nPlaintext: "+(char)m);
 		}
 		return plaintext;
 	}
