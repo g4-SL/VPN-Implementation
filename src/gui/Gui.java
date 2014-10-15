@@ -297,8 +297,6 @@ public class Gui {
 					}
 					String tmp = "";
 					displayLogServer.append(logMsg_server.get(counter_server));
-					//System.out.println(counter_server);
-					//System.out.println(logMsg_server.size());
 					counter_server++;
 				}
 			}
@@ -450,8 +448,6 @@ public class Gui {
 					}
 					String tmp = "";
 					displayLogClient.append(logMsg_client.get(counter_client));
-					//System.out.println(counter_client);
-					//System.out.println(logMsg_client.size());
 					counter_client++;
 					}
 				}

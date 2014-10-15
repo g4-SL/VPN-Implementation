@@ -14,7 +14,7 @@ public class encryption{
     private static ArrayList<String> log_en = new ArrayList<String>();
     private static ArrayList<String> log_de = new ArrayList<String>();
     
-	public static int IV = 'A';
+	public static int IV = 'X';
 	public static int Z = 40;//40
     public static void main(String[] args) throws IOException {
     	/*
@@ -158,7 +158,7 @@ public class encryption{
 			hash_str += Integer.toString(hash.get(i));
 		}
 	}
-	
+	/*
 	public static String bruteF(String ciphertext){
 		String plaintext = "";
 
@@ -176,7 +176,7 @@ public class encryption{
 		}
 		
 		return plaintext;
-	}
+	}*/
 	
 	public ArrayList<String> returnLog_en(){
 		return log_en;
