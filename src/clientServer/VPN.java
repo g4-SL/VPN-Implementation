@@ -154,5 +154,19 @@ public class VPN{
 	public void sendServerMessage(){
 		out.println(en.encrypt(gui.getServerMsg(),gui.getSharedKeyServer()));
 	}
+	
+	/**
+	 * Send a byte array message from client to server through Authentication module.
+	 */
+	public void sendAuthClientMessage(byte[] byteArray){
+		outputClient.println("Replace with bytes");
+	}
+
+	/**
+	 * Send a byte array message from server to client through Authentication module.
+	 */
+	public void sendAuthServerMessage(byte[] byteArray){
+		out.println("Replace with bytes");
+	}
 
 }
