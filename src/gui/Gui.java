@@ -184,26 +184,28 @@ public class Gui {
 		
 		
 		serverLayout.setHorizontalGroup(serverLayout.createSequentialGroup()
-				.addGroup(
-						serverLayout
-								.createParallelGroup(
-										GroupLayout.Alignment.LEADING)
-								.addComponent(serverPortNumLabel)
-								.addComponent(serverPortNumText)
-								.addComponent(sharedKeyServerLabel)
-								.addComponent(sharedKeyServerText)
-								.addGroup(
-										serverLayout
-												.createSequentialGroup()
-												.addComponent(connectServerBtn)
-												// .addComponent(keyServerBtn)
-												.addComponent(
-														sendServerMessageBtn)
-												.addComponent(cancelServerBtn))
-								.addComponent(serverMsgPanel)
-								.addComponent(stepLabelServer)
-								.addComponent(scrollpane_server)
-								.addComponent(stepContinueBtnServer)));
+			.addGroup(
+					serverLayout
+							.createParallelGroup(
+									GroupLayout.Alignment.LEADING)
+							.addComponent(serverPortNumLabel)
+							.addComponent(serverPortNumText)
+							.addComponent(sharedKeyServerLabel)
+							.addComponent(sharedKeyServerText)
+							.addGroup(
+									serverLayout
+											.createSequentialGroup()
+											.addComponent(connectServerBtn)
+											// .addComponent(keyServerBtn)
+											.addComponent(
+													sendServerMessageBtn)
+											.addComponent(cancelServerBtn))
+							.addComponent(serverMsgPanel)
+							.addComponent(stepLabelServer)
+							.addComponent(scrollpane_server)
+							.addComponent(stepContinueBtnServer)
+							)
+				);
 
 		serverLayout.setVerticalGroup(serverLayout
 				.createSequentialGroup()
@@ -291,15 +293,14 @@ public class Gui {
 		stepContinueBtnServer.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (counter_server != -1){
-					if (counter_server == logMsg_server.size()) {
-						clearLogMsgServer();
-						counter_server = 0;
+					if (counter_server != logMsg_server.size()) {
+						String tmp = "";
+						displayLogServer.append(logMsg_server.get(counter_server));
+						displayLogServer.append("\n");
+						//System.out.println(counter_server);
+						//System.out.println(logMsg_server.size());
+						counter_server++;
 					}
-					String tmp = "";
-					displayLogServer.append(logMsg_server.get(counter_server));
-					//System.out.println(counter_server);
-					//System.out.println(logMsg_server.size());
-					counter_server++;
 				}
 			}
 		});
@@ -318,7 +319,6 @@ public class Gui {
 		JLabel sharedKeyClientLabel = new JLabel("Enter shared key");
 		final JTextField sharedKeyClientText = new JTextField(20);
 		JButton connectClientBtn = new JButton("Connect");
-		// JButton keyClientBtn = new JButton("Set key");
 		JButton sendClientMessageBtn = new JButton("Send");
 		JButton cancelClientBtn = new JButton("Cancel");
 		final JLabel stepLabelClient = new JLabel("PROGRAM LOG");
@@ -444,17 +444,14 @@ public class Gui {
 		stepContinueBtnClient.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (counter_client != -1){
-					if (counter_client == logMsg_client.size()) {
-						clearLogMsgClient();
-						counter_client = 0;
-					}
-					String tmp = "";
-					displayLogClient.append(logMsg_client.get(counter_client));
-					//System.out.println(counter_client);
-					//System.out.println(logMsg_client.size());
-					counter_client++;
+					if (counter_client != logMsg_client.size()) {
+						String tmp = "";
+						displayLogClient.append(logMsg_client.get(counter_client));
+						displayLogServer.append("\n");
+						counter_client++;
 					}
 				}
+			}
 		});
 
 		serverPanel.setLayout(serverLayout);
