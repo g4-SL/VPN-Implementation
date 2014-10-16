@@ -13,6 +13,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
+import authentication.Driver;
+
 /*
  * Author: Group 8
  * Last Modified: October 15, 2014
@@ -37,13 +39,17 @@ public class VPN{
 	
 	private static encryption en;
 	
+	private static Driver au;
+	
 	private static boolean serverMode = false; // true is authentication mode, false is encryption mode
 	private static boolean clientMode = false; // true is authentication mode, false is encryption mode
+
 	private static String authClientMsg;
 	private static String authServerMsg;
 	
 	public VPN(){
 		en = new encryption();
+		au = new Driver();
 		System.out.println("VPN package is speaking");
 	}
 
@@ -75,22 +81,16 @@ public class VPN{
 					// Setup an output stream to send data to the server
 					outputClient = new PrintWriter(client.getOutputStream(), true);
 
+					au.authentication();
+					
 					// --------- Client handles its incoming data here ---------//
 							
+	
 					String received;
 					while( (received = input.readLine()) != null){
-
-						if(clientMode == true){
-							System.out.println("Client is in Authentication mode");						
-							authClientMsg = received;
-							System.out.println("Client msg received (copy): " + authClientMsg);
-							System.out.println("Client msg received (original): " + received);
-						}
-						else{
 							System.out.println("Client is in Encryption mode");
-							System.out.println("Client encrypted msg received: " + en.decrypt(received,gui.getSharedKeyClient()));
+							//System.out.println("Client encrypted msg received: " + en.decrypt(received,gui.getSharedKeyClient()));
 							gui.displayMsgOnClient(en.decrypt(received,gui.getSharedKeyClient()));
-						}
 					}				
 
 					// ----------- Close the client's socket and streams ----------//
@@ -133,19 +133,13 @@ public class VPN{
 					// -------- Server handles its incoming data here --------//
 					
 					String incomingData;
-					while ((incomingData = in.readLine()) != null) {
 
-						if(serverMode == true){
-							System.out.println("Server is in Authentication mode");							
-							authServerMsg = incomingData;
-							System.out.println("Server msg received (copy): " + authServerMsg);
-							System.out.println("Server msg received (original): " + incomingData);
-						}
-						else{
+					while( (incomingData = in.readLine()) != null){
+
 							System.out.println("Server is in Encryption mode");
-							System.out.println("Server encrypted msg received: " + incomingData);
-							gui.displayMsgOnServer(en.decrypt(incomingData, gui.getSharedKeyServer()));
-						}
+							//System.out.println("Server encrypted msg received: " + incomingData);
+						gui.displayMsgOnServer(en.decrypt(incomingData, gui.getSharedKeyServer()));
+
 					}
 					
 					// ----------- Close the server's socket and streams ---------//
@@ -177,7 +171,7 @@ public class VPN{
 	/**
 	 * Send a message from client to server.
 	 */
-	public void sendClientMessage(){
+	public static void sendClientMessage(){
 		outputClient.println(en.encrypt(gui.getClientMsg(), gui.getSharedKeyClient()));
 		gui.setLogMsg(en.returnLog_en(),en.returnLog_de());
 		gui.clearLogMsgClient("Message Sent.\n");
@@ -187,18 +181,20 @@ public class VPN{
 	/**
 	 * Send a message from server to client.
 	 */
-	public void sendServerMessage(){
+	public static void sendServerMessage(){
 		out.println(en.encrypt(gui.getServerMsg(),gui.getSharedKeyServer()));
 		gui.setLogMsg(en.returnLog_de(),en.returnLog_en());
 		gui.clearLogMsgClient("");
-		gui.clearLogMsgServer("Message sent.\n");
+		gui.clearLogMsgServer("Message sent.\n");	
 	}
 	
 	/**
 	 * Send a char array message from client to server.
 	 * @Module: Authentication.
 	 */
-	public void sendAuthClientMessage(char[] charArr){		
+	public static void sendAuthClientMessage(char[] charArr){
+		System.out.println("charArr: " + charArr);
+		System.out.println("toString: "+charArr.toString());
 		outputClient.println(charArr);
 	}
 
@@ -206,7 +202,7 @@ public class VPN{
 	 * Send a char array message from server to client.
 	 * @Module: Authentication.
 	 */
-	public void sendAuthServerMessage(char[] charArr){
+	public static void sendAuthServerMessage(char[] charArr){
 		out.println(charArr);
 	}
 	
@@ -241,5 +237,9 @@ public class VPN{
 	public void setServerMode(boolean mode){
 		serverMode = mode;
 	}
-
+	
+	public static boolean returnMode(){
+		return clientMode;
+	}
+	
 }

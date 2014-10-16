@@ -23,6 +23,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import clientServer.VPN;
+import authentication.Driver;
 
 /*
  * Author: Group 8
@@ -55,11 +56,11 @@ public class Gui {
 	private JTextField displayMsgFieldOnServer;
 	private JTextField displayMsgFieldOnClient;
 
-	private JTextArea displayLogServer;
-	private JTextArea displayLogClient;
+	private static JTextArea displayLogServer;
+	private static JTextArea displayLogClient;
 	
 	private static VPN myVPN = new VPN();
-	//private static authentication an = new authentication();
+	private static Driver an = new Driver();
 	
     char[] charArrS ={ 't', 'r', 'o', 'p', 'i', 'c', 'a', 'l' }; // testing
     char[] charArrC ={ 'i', 's', 'l', 'a', 'n', 'd' }; // testing
@@ -234,21 +235,25 @@ public class Gui {
 				if (serverPortNum.equals(""))
 					displayLogServer.append("Port number is missing.");
 				else {
-					/***
-					 * might need to change logic of checking if server is
-					 * connected later on
-					 ***/
-					isServerConnected = true;
-			
+					int portNumber = Integer.parseInt(serverPortNum);
+
 					// Assume that initially the mode is set to authentication.	
 					
 					// Call VPN package to set up the server
-					int portNumber = Integer.parseInt(serverPortNum);
 					myVPN.runServerThread(portNumber);
 					
 					// When done with authentication, set mode to encryption.
 					//myVPN.setServerMode(false);
 
+					
+					
+					/***
+					 * might need to change logic of checking if server is
+					 * connected later on
+					 ***/
+					
+					isServerConnected = true;
+					
 					displayLogServer.append("Server socket created at port number: " + serverPortNum);
 				}
 			}
@@ -261,6 +266,8 @@ public class Gui {
 		cancelServerBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				isServerConnected = false;
+				myVPN.setClientMode(true);
+				myVPN.setServerMode(true);
 				serverPortNumText.setText("");
 				sharedKeyServerText.setText("");
 				serverMsgTextField.setText("");
@@ -273,10 +280,10 @@ public class Gui {
 				//serverPortNumText.setText("");
 				// sharedKeyServerText.setText("");
 
-				if (isServerConnected) {
+				if (isServerConnected  && !myVPN.returnMode()) {
 					serverMsg = serverMsgTextField.getText();
 					displayLogServer.append("Sending server message: " + serverMsg+"\n");
-
+					
 					myVPN.sendServerMessage();
 					//myVPN.sendAuthServerMessage(charArrS); // testing
 					
@@ -409,6 +416,8 @@ public class Gui {
 		cancelClientBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				isClientConnected = false;
+				myVPN.setClientMode(true);
+				myVPN.setServerMode(true);
 				clientPortNumTextField.setText("");
 				ipAddTextField.setText("");
 				sharedKeyClientText.setText("");
@@ -421,7 +430,7 @@ public class Gui {
 			public void actionPerformed(ActionEvent e) {
 				sharedKeyClient = sharedKeyClientText.getText();
 
-				if (isClientConnected) {
+				if (isClientConnected && !myVPN.returnMode()) {
 					clientMsg = clientMsgTextField.getText();
 					displayLogClient.append("Sending client message: " + clientMsg+"\n");
 
@@ -556,5 +565,9 @@ public class Gui {
 		// Pass the current GUI object to the VPN
 		myVPN.setGUI(showGUI);
 
+	}
+	
+	public static void displayLogAppend(String str){
+		displayLogClient.append(str);
 	}
 }
