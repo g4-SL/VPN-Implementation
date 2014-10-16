@@ -50,7 +50,7 @@ public class Authentication
 	private PublicKey partnerSignatureKey = null;
 	private PublicKey partnerFinalKey = null;
 	
-	
+		
 //	private final static int rsaSigKeySize = 1024;
 	//the signing key needs to be 11 bytes (88 bits) larger than the public key
 	
@@ -163,6 +163,13 @@ public class Authentication
 		{
 			setOfKeys[i] = (char) keySet[i];
 		}
+//		System.out.println((int)setOfKeys[5]);
+//		System.out.println((int)'0');
+		setOfKeys[4] = 'S';
+		setOfKeys[12] = 'O';
+//		setOfKeys[65] = 'D';
+//		setOfKeys[65] = (char) keySet[65];
+		
 		
 		return setOfKeys;
 	}
@@ -235,10 +242,16 @@ public class Authentication
 	public void receivePartnerDataKey(char[] receivedCharKey)
 	{
 		byte[] receivedKey = new byte[receivedCharKey.length];
+//		receivedCharKey[4] =  System.getProperty("line.separator");
+//		receivedCharKey[12] = (char) System.getProperty("line.separator").getBytes();
+//		receivedCharKey[65] = magicCharData65;
+		
 		for(int i=0;i<receivedCharKey.length;i++)
 		{
 			receivedKey[i]=(byte)receivedCharKey[i];
 		}
+		receivedKey[4] = System.getProperty("line.separator").getBytes()[0];
+		receivedKey[12] = System.getProperty("line.separator").getBytes()[0];
 		X509EncodedKeySpec ksDataKey = new X509EncodedKeySpec(receivedKey);
 		KeyFactory kf;
 		try 
@@ -338,11 +351,11 @@ public class Authentication
 	
 	public void viewPublicKeys()
 	{
-		System.out.println("keyPairData");
+		System.out.println("keyPairData:");
 		System.out.println(keyPairData.getPublic().toString());
-		System.out.println("keyPairSignature");
+		System.out.println("keyPairSignature:");
 		System.out.println(keyPairSignature.getPublic().toString());
-		System.out.println("keyPairFinal");
+		System.out.println("keyPairFinal:");
 		System.out.println(keyPairFinal.getPublic().toString());
 	}
 	
@@ -353,11 +366,11 @@ public class Authentication
 	
 	public void viewPartnerPublicKeys()
 	{
-		System.out.println("partnerDataKey");
+		System.out.println("partnerDataKey:");
 		System.out.println(partnerDataKey.toString());
-		System.out.println("partnerSignatureKey");
+		System.out.println("partnerSignatureKey:");
 		System.out.println(partnerSignatureKey.toString());
-		System.out.println("partnerFinalKey");
+		System.out.println("partnerFinalKey:");
 		System.out.println(partnerFinalKey.toString());
 	}
 	
@@ -411,6 +424,10 @@ public class Authentication
 			
 			mySignatureSign =  Signature.getInstance("SHA1withRSA");
 			mySignatureSign.initSign(keyPairSignature.getPrivate(),secRand);
+			
+			
+			byte[] keySet = keyPairData.getPublic().getEncoded();
+			
 			
 			//do this once we have the partnerSignaturePublicKey
 		//	Signature sigVer =  Signature.getInstance("SHA1withRSA");
