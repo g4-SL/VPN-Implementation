@@ -77,9 +77,9 @@ public class Gui {
 		mainFrame = new JFrame("VPN EECE 412");
 		mainFrame.setSize(600, 800);
 		mainFrame.setLayout(new FlowLayout());
-
+/*
 		statusLabel = new JLabel("", JLabel.CENTER);
-		statusLabel.setSize(350, 50);
+		statusLabel.setSize(350, 50);*/
 
 		mainFrame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent windowEvent) {
@@ -95,7 +95,7 @@ public class Gui {
 
 		mainFrame.add(userTypePanel);
 		mainFrame.add(controlPanel);
-		mainFrame.add(statusLabel);
+		//mainFrame.add(statusLabel);
 		mainFrame.setVisible(true);
 	}
 
@@ -235,12 +235,11 @@ public class Gui {
 
 		connectServerBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				clearLogMsgServer("");
 				serverPortNum = serverPortNumText.getText();
 				sharedKeyServer = sharedKeyServerText.getText();
 				if (serverPortNum.equals(""))
-					statusLabel.setText("port number is missing");
-				// else if(sharedKeyServer.equals(""))
-				// statusLabel.setText("shared key is missing");
+					displayLogServer.append("Port number is missing.");
 				else {
 					/***
 					 * might need to change logic of checking if server is
@@ -257,7 +256,7 @@ public class Gui {
 					// When done with authentication, set mode to encryption.
 					//myVPN.setServerMode(false);
 
-					statusLabel.setText("Port number: " + serverPortNum);
+					displayLogServer.append("Server socket created at port number: " + serverPortNum);
 				}
 			}
 		});
@@ -272,7 +271,7 @@ public class Gui {
 				serverPortNumText.setText("");
 				sharedKeyServerText.setText("");
 				serverMsgTextField.setText("");
-				statusLabel.setText("Clear server");
+				displayLogServer.setText("Clear server");
 				//myVPN.closeSocketServer();
 			}
 		});
@@ -290,7 +289,7 @@ public class Gui {
 
 				if (isServerConnected) {
 					serverMsg = serverMsgTextField.getText();
-					statusLabel.setText("Sending server message: " + serverMsg);
+					displayLogServer.append("Sending server message: " + serverMsg+"\n");
 
 					myVPN.sendServerMessage();
 					//myVPN.sendAuthServerMessage(charArrS); // testing
@@ -299,9 +298,9 @@ public class Gui {
 										
 				} else {
 					serverMsg = "";
-					statusLabel
-							.setText("Connect to a client before sending a message"
-									+ clientMsg); // clientMsg is there to check
+					displayLogServer
+							.append("Connect to a client before sending a message"
+									+ clientMsg+"\n"); // clientMsg is there to check
 													// if string is cleared
 				}
 			}
@@ -313,7 +312,6 @@ public class Gui {
 					if (counter_server != logMsg_server.size()) {
 						String tmp = "";
 						displayLogServer.append(logMsg_server.get(counter_server));
-						displayLogServer.append("\n");
 						//System.out.println(counter_server);
 						//System.out.println(logMsg_server.size());
 						counter_server++;
@@ -392,13 +390,14 @@ public class Gui {
 
 		connectClientBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				clearLogMsgClient("");
 				clientPortNum = clientPortNumTextField.getText();
 				ipAdd = ipAddTextField.getText();
 				sharedKeyClient = sharedKeyClientText.getText();
 				if (clientPortNum.equals(""))
-					statusLabel.setText("IP address is missing");
+					clearLogMsgClient("Port number is missing");
 				else if (ipAdd.equals(""))
-					statusLabel.setText("host name is missing");
+					clearLogMsgClient("IP address is missing");
 				// else if(sharedKeyClient.equals(""))
 				// statusLabel.setText("shared key is missing");
 				else {
@@ -417,9 +416,8 @@ public class Gui {
 					// When done with authentication, set mode to encryption.
 					//myVPN.setClientMode(false);
 
-					statusLabel.setText("IP: " + clientPortNum
-							+ " and host name: " + ipAdd + " Shared Key: "
-							+ sharedKeyClient);
+					displayLogClient.append("IP Address " + ipAdd
+							+ "\nPort number: " + clientPortNum+"\n");
 				}
 			}
 		});
@@ -431,7 +429,7 @@ public class Gui {
 				ipAddTextField.setText("");
 				sharedKeyClientText.setText("");
 				clientMsgTextField.setText("");
-				statusLabel.setText("Clear client");
+				displayLogClient.setText("Clear client");
 				//myVPN.closeSocketClient();
 			}
 		});
@@ -451,7 +449,7 @@ public class Gui {
 
 				if (isClientConnected) {
 					clientMsg = clientMsgTextField.getText();
-					statusLabel.setText("Sending client message: " + clientMsg);
+					displayLogClient.append("Sending client message: " + clientMsg+"\n");
 
 					myVPN.sendClientMessage();
 					//myVPN.sendAuthClientMessage(charArrC); // testing
@@ -459,10 +457,9 @@ public class Gui {
 					System.out.println("You clicked SEND CLIENT button");
 				} else {
 					clientMsg = "";
-					statusLabel
-							.setText("Connect to a client before sending a message"
-									+ serverMsg); // serverMsg is there to check
-													// if string is cleared
+					clearLogMsgClient("Connect to a client before sending a message:"
+							+ serverMsg);
+
 				}
 			}
 		});
@@ -474,7 +471,6 @@ public class Gui {
 					if (counter_client != logMsg_client.size()) {
 						String tmp = "";
 						displayLogClient.append(logMsg_client.get(counter_client));
-						displayLogServer.append("\n");
 						counter_client++;
 
 					}
@@ -510,7 +506,7 @@ public class Gui {
 					cardLayout.show(panel, (String) listCombo
 							.getItemAt(listCombo.getSelectedIndex()));
 				}
-				statusLabel.setText(data);
+				//statusLabel.setText(data);
 			}
 		});
 
@@ -555,11 +551,21 @@ public class Gui {
 		logMsg_server = log2;
 	}
 	
-	public void clearLogMsgClient(){
-		displayLogClient.setText("");
+	public void clearLogMsgClient(String str){
+		if (str == "")
+			displayLogClient.setText(str);
+		else{
+			displayLogClient.setText("");
+			displayLogClient.append(str);
+		}
 	}
-	public void clearLogMsgServer(){
-		displayLogServer.setText("");
+	public void clearLogMsgServer(String str){
+		if (str == "")
+			displayLogServer.setText(str);
+		else{
+			displayLogServer.setText("");
+			displayLogServer.append(str);
+		}
 	}
 	
 	public String getSharedKeyClient() {

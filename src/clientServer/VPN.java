@@ -182,8 +182,8 @@ public class VPN{
 	public void sendClientMessage(){
 		outputClient.println(en.encrypt(gui.getClientMsg(), gui.getSharedKeyClient()));
 		gui.setLogMsg(en.returnLog_en(),en.returnLog_de());
-		gui.clearLogMsgClient();
-		gui.clearLogMsgServer();
+		gui.clearLogMsgClient("Message Sent.\n");
+		gui.clearLogMsgServer("");
 	}
 
 	/**
@@ -192,8 +192,8 @@ public class VPN{
 	public void sendServerMessage(){
 		out.println(en.encrypt(gui.getServerMsg(),gui.getSharedKeyServer()));
 		gui.setLogMsg(en.returnLog_de(),en.returnLog_en());
-		gui.clearLogMsgClient();
-		gui.clearLogMsgServer();
+		gui.clearLogMsgClient("");
+		gui.clearLogMsgServer("Message sent.\n");
 	}
 	
 	/**
