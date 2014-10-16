@@ -1,6 +1,8 @@
 package authentication;
 
 
+import gui.Gui;
+
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -63,6 +65,8 @@ public class Authentication
 //	private final static int gValue = 71;
 	private final static int pValue = 1376410991;
 	private final static int gValue = 2069551451;
+	
+	private static Gui gui = Driver.gui;
 	
 //	public String buildMessage()
 //	{
@@ -248,6 +252,7 @@ public class Authentication
 		
 		for(int i=0;i<receivedCharKey.length;i++)
 		{
+			System.out.println(receivedCharKey[i]);
 			receivedKey[i]=(byte)receivedCharKey[i];
 		}
 		receivedKey[4] = System.getProperty("line.separator").getBytes()[0];
@@ -350,12 +355,18 @@ public class Authentication
 	}
 	
 	public void viewPublicKeys()
-	{
+	{	
+		gui.displayLogAppend("KeyPairData:\n");
 		System.out.println("keyPairData:");
+		gui.displayLogAppend(keyPairData.getPublic().toString()+"\n");
 		System.out.println(keyPairData.getPublic().toString());
+		gui.displayLogAppend("KeyPairSignature:\n");
 		System.out.println("keyPairSignature:");
+		gui.displayLogAppend(keyPairSignature.getPublic().toString()+"\n");
 		System.out.println(keyPairSignature.getPublic().toString());
+		gui.displayLogAppend("KeyPairFinal:\n");
 		System.out.println("keyPairFinal:");
+		gui.displayLogAppend(keyPairFinal.getPublic().toString()+"\n");
 		System.out.println(keyPairFinal.getPublic().toString());
 	}
 	
@@ -366,11 +377,17 @@ public class Authentication
 	
 	public void viewPartnerPublicKeys()
 	{
+		gui.displayLogAppend("partnerDataKey:\n");
 		System.out.println("partnerDataKey:");
+		gui.displayLogAppend(partnerDataKey.toString()+"\n");
 		System.out.println(partnerDataKey.toString());
+		gui.displayLogAppend("partnerSignatureKey:\n");
 		System.out.println("partnerSignatureKey:");
+		gui.displayLogAppend(partnerSignatureKey.toString()+"\n");
 		System.out.println(partnerSignatureKey.toString());
+		gui.displayLogAppend("partnerFinalKey:\n");
 		System.out.println("partnerFinalKey:");
+		gui.displayLogAppend(partnerFinalKey.toString()+"\n");
 		System.out.println(partnerFinalKey.toString());
 	}
 	

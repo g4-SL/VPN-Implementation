@@ -1,7 +1,6 @@
 package encrytpion;
 
 import java.security.MessageDigest;
-
 import java.security.NoSuchAlgorithmException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -15,6 +14,7 @@ import java.util.ArrayList;
  * Version: Encrypt very long plaintext
  */
 public class encryption{
+	
     private static ArrayList<String> log_en = new ArrayList<String>();
     private static ArrayList<String> log_de = new ArrayList<String>();
 
