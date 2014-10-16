@@ -59,6 +59,7 @@ public class Gui {
 	private JTextArea displayLogClient;
 	
 	private static VPN myVPN = new VPN();
+	//private static authentication an = new authentication();
 	
     char[] charArrS ={ 't', 'r', 'o', 'p', 'i', 'c', 'a', 'l' }; // testing
     char[] charArrC ={ 'i', 's', 'l', 'a', 'n', 'd' }; // testing
