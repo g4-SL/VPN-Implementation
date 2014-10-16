@@ -132,9 +132,9 @@ public class Authentication
 		//NOTE: is is not an issue if a negative exponent is generated
 	}
 	
-	public byte[] sendPublicKeys()
+	public char[] sendPublicKeys()
 	{
-		byte[] setOfKeys = null;
+		char[] setOfKeys = null;
 		
 		int length  = 0;
 		int keyPairDataLength = keyPairData.getPublic().getEncoded().length;
@@ -145,28 +145,60 @@ public class Authentication
 		System.arraycopy(keyPairData.getPublic().getEncoded(), 0, keySet, 0, keyPairDataLength);
 		System.arraycopy(keyPairSignature.getPublic().getEncoded(), 0, keySet, keyPairDataLength, keyPairSignatureLength);
 		System.arraycopy(keyPairFinal.getPublic().getEncoded(), 0, keySet, keyPairSignatureLength, keyPairFinalLength);		
-		setOfKeys = keySet;
+		
+		setOfKeys = new char[keySet.length];
+		for(int i=0;i<keySet.length;i++)
+		{
+			setOfKeys[i] = (char) keySet[i];
+		}
 		
 		return setOfKeys;
 	}
 	
-	public byte[] sendPublicDataKey()
+	public char[] sendPublicDataKey()
 	{
-		return keyPairData.getPublic().getEncoded();
+		byte[] keySet = keyPairData.getPublic().getEncoded();
+		char[] setOfKeys = new char[keySet.length];
+		for(int i=0;i<keySet.length;i++)
+		{
+			setOfKeys[i] = (char) keySet[i];
+		}
+		
+		return setOfKeys;
 	}
 	
-	public byte[] sendPublicSignatureKey()
+	public char[] sendPublicSignatureKey()
 	{
-		return keyPairSignature.getPublic().getEncoded();
+		byte[] keySet = keyPairSignature.getPublic().getEncoded();
+		char[] setOfKeys = new char[keySet.length];
+		for(int i=0;i<keySet.length;i++)
+		{
+			setOfKeys[i] = (char) keySet[i];
+		}
+		
+		return setOfKeys;
 	}
 	
-	public byte[] sendPublicFinalKey()
+	public char[] sendPublicFinalKey()
 	{
-		return keyPairFinal.getPublic().getEncoded();
+		byte[] keySet = keyPairFinal.getPublic().getEncoded();
+		char[] setOfKeys = new char[keySet.length];
+		for(int i=0;i<keySet.length;i++)
+		{
+			setOfKeys[i] = (char) keySet[i];
+		}
+		
+		return setOfKeys;
+		//return keyPairFinal.getPublic().getEncoded();
 	}
 	
-	public void receivePublicKeys(byte[] receivedKeys)
+	public void receivePublicKeys(char[] receivedCharKeys)
 	{
+		byte[] receivedKeys = new byte[receivedCharKeys.length];
+		for(int i=0;i<receivedCharKeys.length;i++)
+		{
+			receivedKeys[i]=(byte)receivedCharKeys[i];
+		}
 		//byte[] rPubKey = receivedFrame.data;
 		int keyPairDataLength = keyPairData.getPublic().getEncoded().length;
 		int keyPairSignatureLength = keyPairSignature.getPublic().getEncoded().length;
@@ -174,18 +206,18 @@ public class Authentication
 		
 		byte[] partnerDataKeyRaw = Arrays.copyOfRange(receivedKeys, 0, keyPairDataLength);
 		byte[] partnerSignatureKeyRaw = Arrays.copyOfRange(receivedKeys, keyPairDataLength, keyPairSignatureLength);
-	//	byte[] partnerFinalKeyRaw = Arrays.copyOfRange(receivedKeys, keyPairSignatureLength, keyPairFinalLength);
+		byte[] partnerFinalKeyRaw = Arrays.copyOfRange(receivedKeys, keyPairSignatureLength, keyPairFinalLength);
 		
 		X509EncodedKeySpec ksDataKey = new X509EncodedKeySpec(partnerDataKeyRaw);
 		X509EncodedKeySpec ksSignatureKey = new X509EncodedKeySpec(partnerSignatureKeyRaw);
-	//	X509EncodedKeySpec ksFinalKey = new X509EncodedKeySpec(partnerFinalKeyRaw);
+		X509EncodedKeySpec ksFinalKey = new X509EncodedKeySpec(partnerFinalKeyRaw);
 		KeyFactory kf;
 		try 
 		{
 			kf = KeyFactory.getInstance("RSA");
 			partnerDataKey = kf.generatePublic(ksDataKey);
 			partnerSignatureKey = kf.generatePublic(ksSignatureKey);
-	//		partnerFinalKey = kf.generatePublic(ksFinalKey);
+			partnerFinalKey = kf.generatePublic(ksFinalKey);
 			
 			partnerSignatureVerify =  Signature.getInstance("SHA1withRSA");
 			partnerSignatureVerify.initVerify(partnerSignatureKey);
@@ -200,8 +232,13 @@ public class Authentication
 		
 	}
 	
-	public void receivePartnerDataKey(byte[] receivedKey)
+	public void receivePartnerDataKey(char[] receivedCharKey)
 	{
+		byte[] receivedKey = new byte[receivedCharKey.length];
+		for(int i=0;i<receivedCharKey.length;i++)
+		{
+			receivedKey[i]=(byte)receivedCharKey[i];
+		}
 		X509EncodedKeySpec ksDataKey = new X509EncodedKeySpec(receivedKey);
 		KeyFactory kf;
 		try 
@@ -219,8 +256,13 @@ public class Authentication
 		
 	}
 	
-	public void receivePartnerSignatureKey(byte[] receivedKey)
+	public void receivePartnerSignatureKey(char[] receivedCharKey)
 	{
+		byte[] receivedKey = new byte[receivedCharKey.length];
+		for(int i=0;i<receivedCharKey.length;i++)
+		{
+			receivedKey[i]=(byte)receivedCharKey[i];
+		}
 		X509EncodedKeySpec ksSignatureKey = new X509EncodedKeySpec(receivedKey);
 		KeyFactory kf;
 		try 
@@ -241,8 +283,13 @@ public class Authentication
 		
 	}
 	
-	public void receivePartnerFinalKey(byte[] receivedKey)
+	public void receivePartnerFinalKey(char[] receivedCharKey)
 	{
+		byte[] receivedKey = new byte[receivedCharKey.length];
+		for(int i=0;i<receivedCharKey.length;i++)
+		{
+			receivedKey[i]=(byte)receivedCharKey[i];
+		}
 		X509EncodedKeySpec ksFinalKey = new X509EncodedKeySpec(receivedKey);
 		KeyFactory kf;
 		try 
