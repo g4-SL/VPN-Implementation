@@ -1,12 +1,19 @@
 package encrytpion;
 
 import java.security.MessageDigest;
+
 import java.security.NoSuchAlgorithmException;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Scanner;
 
+
+/*
+ * Author: Group 8
+ * Last Modified: October 15, 2014
+ * Course: EECE 412, Assignment 3
+ * Purpose: Encrypt plaintext and decrypt ciphertext
+ * Version: Encrypt very long plaintext
+ */
 public class encryption{
     private static ArrayList<String> log_en = new ArrayList<String>();
     private static ArrayList<String> log_de = new ArrayList<String>();
@@ -111,7 +118,7 @@ public class encryption{
 			plaintext = (char) m + plaintext;
 			
 			de_counter -= Z;
-			log_de.add("shift(ciphertext("+de_counter+"-"+(de_counter+Z)+")) with key "+key+" : "+m+"\nPlaintext: "+(char)m);
+			log_de.add("shift(ciphertext("+de_counter+"-"+(de_counter+Z)+")) with key "+key+" : "+m+"\nPlaintext: "+(char)m+"\n");
 		}
 		return plaintext;
 	}

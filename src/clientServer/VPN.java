@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 /*
  * Author: Group 8
- * Last Modified: October 12, 2014
+ * Last Modified: October 15, 2014
  * Course: EECE 412, Assignment 3
  * Purpose: Implements a client and server threads using TCP connection
  */
@@ -102,13 +102,11 @@ public class VPN{
 				}
 				catch (UnknownHostException e) {
 					System.out.println("UnknownHostException: unknown host");
-					System.out.println("                      Please enter a valid host name.");
-					//e.printStackTrace();
+					System.out.println("Please enter a valid host name.");
 				}
 				catch (IOException e) {
 					System.out.println("ConnectException: No process is listening on the remote port.");
-					System.out.println("                  Please set up the server first.");
-					//e.printStackTrace();
+					System.out.println("Please set up the server first.");
 				}
 			}
 		} ).start();
@@ -243,23 +241,5 @@ public class VPN{
 	public void setServerMode(boolean mode){
 		serverMode = mode;
 	}
-	/*
-	public void closeSocketClient(){
-		try{
-			clientSocket.close();
-		}
-		catch (IOException e){
-			System.out.println("IOException occurs when closing client socket.");
-		}
-	}
-	
-	public void closeSocketServer(){
-		try{
-			clientSocket.close();
-		}
-		catch (IOException e){
-			System.out.println("IOException occurs when closing server socket.");
-		}
-	}*/
 
 }

@@ -26,16 +26,13 @@ import clientServer.VPN;
 
 /*
  * Author: Group 8
- * Last Modified: October 12, 2014
+ * Last Modified: October 15, 2014
  * Course: EECE 412, Assignment 3
  * Purpose: Implements GUI and initiates Client-Server connection.
- * Version: Added send and received text fields.
  */
 
 public class Gui {
 	private JFrame mainFrame;
-	private JLabel headerLabel;
-	private JLabel statusLabel;
 	private JPanel controlPanel;
 	private JPanel userTypePanel;
 	private String clientPortNum;
@@ -77,9 +74,6 @@ public class Gui {
 		mainFrame = new JFrame("VPN EECE 412");
 		mainFrame.setSize(600, 800);
 		mainFrame.setLayout(new FlowLayout());
-/*
-		statusLabel = new JLabel("", JLabel.CENTER);
-		statusLabel.setSize(350, 50);*/
 
 		mainFrame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent windowEvent) {
@@ -95,7 +89,6 @@ public class Gui {
 
 		mainFrame.add(userTypePanel);
 		mainFrame.add(controlPanel);
-		//mainFrame.add(statusLabel);
 		mainFrame.setVisible(true);
 	}
 
@@ -225,7 +218,6 @@ public class Gui {
 								.createParallelGroup(
 										GroupLayout.Alignment.LEADING)
 								.addComponent(connectServerBtn)
-								// .addComponent(keyServerBtn)
 								.addComponent(sendServerMessageBtn)
 								.addComponent(cancelServerBtn))
 				.addComponent(serverMsgPanel)
@@ -272,15 +264,8 @@ public class Gui {
 				sharedKeyServerText.setText("");
 				serverMsgTextField.setText("");
 				displayLogServer.setText("Clear server");
-				//myVPN.closeSocketServer();
 			}
 		});
-
-		// keyServerBtn.addActionListener(new ActionListener() {
-		// public void actionPerformed(ActionEvent e) {
-		// sharedKeyServer = sharedKeyServerText.getText();
-		// }
-		// });
 
 		sendServerMessageBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -398,8 +383,6 @@ public class Gui {
 					clearLogMsgClient("Port number is missing");
 				else if (ipAdd.equals(""))
 					clearLogMsgClient("IP address is missing");
-				// else if(sharedKeyClient.equals(""))
-				// statusLabel.setText("shared key is missing");
 				else {
 					/***
 					 * might need to change logic of checking if client is
@@ -430,29 +413,18 @@ public class Gui {
 				sharedKeyClientText.setText("");
 				clientMsgTextField.setText("");
 				displayLogClient.setText("Clear client");
-				//myVPN.closeSocketClient();
 			}
 		});
 
-		// keyClientBtn.addActionListener(new ActionListener() {
-		// public void actionPerformed(ActionEvent e) {
-		// sharedKeyClient = sharedKeyClientText.getText();
-		// }
-		// });
-
 		sendClientMessageBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//clientPortNumTextField.setText("");
-				//ipAddTextField.setText("");
 				sharedKeyClient = sharedKeyClientText.getText();
-				// sharedKeyClientText.setText("");
 
 				if (isClientConnected) {
 					clientMsg = clientMsgTextField.getText();
 					displayLogClient.append("Sending client message: " + clientMsg+"\n");
 
 					myVPN.sendClientMessage();
-					//myVPN.sendAuthClientMessage(charArrC); // testing
 					
 					System.out.println("You clicked SEND CLIENT button");
 				} else {
@@ -506,7 +478,6 @@ public class Gui {
 					cardLayout.show(panel, (String) listCombo
 							.getItemAt(listCombo.getSelectedIndex()));
 				}
-				//statusLabel.setText(data);
 			}
 		});
 
@@ -514,7 +485,6 @@ public class Gui {
 		userTypePanel.add(selectBtn);
 		controlPanel.add(panel);
 		controlPanel.add(stepPanel);
-		// controlPanel.add(statusLabel);
 
 		mainFrame.setVisible(true);
 	}
