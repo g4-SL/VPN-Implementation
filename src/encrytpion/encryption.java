@@ -7,35 +7,21 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-
-
-//CBC
 public class encryption{
     private static ArrayList<String> log_en = new ArrayList<String>();
     private static ArrayList<String> log_de = new ArrayList<String>();
-    
-    private static String key;
+
     private static int en_counter = 0;
     private static int de_counter = 0;
-	public static int Z = 40;//40
+	public static int Z = 40;
 	public static int SPLIT = 7;
 	
-    public static void main(String[] args) throws IOException {
-    	
-    	while(true){
-	    	String plaintext = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC";
-	    	key = "99999999999999999999999999999999999999999999999999999999999999999999999sNFkjsDNfkjdsnfmlsdfnsdlkfmdsllkjf9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999";
-	       	String ciphertext = encrypt(plaintext,key);
-	    	System.out.println("Ciphertext:"+ciphertext+"\n");
-	    	System.out.println("Plaintext:"+decrypt(ciphertext,key));
-	    	System.out.println("=======================================================================================================");
-    	}
-    }
-    
+	// This splits the plaintext and encrypts each segment.
 	public static String encrypt(String plaintext, String key_in){
 		en_counter = 0;
 		log_en.clear();
 		log_en.add("Key: "+key_in+"\n");
+		
 		ArrayList<Integer> hash = new ArrayList();
 		hash(md5(key_in),hash);
 		log_en.add("md5(key): "+ md5(key_in)+"\n");
@@ -44,6 +30,8 @@ public class encryption{
 		String ciphertext = "";
 		int i,j=0;
 		String tmp = "";
+		
+		// Split the plaintext
 		for ( i = 0 ; i < plaintext.length();i+=SPLIT){
 			if (i+SPLIT < plaintext.length()){
 				tmp = en_loop(plaintext.substring(i,i+SPLIT),hash);
@@ -58,15 +46,18 @@ public class encryption{
 		return ciphertext;
 	}
 	
+	// This encrypt the message with a length of SPLIT or less than SPLIT.
 	public static String en_loop(String plaintext, ArrayList<Integer> hash){
 		String ciphertext = "";
 
-		int IV = 0 + (int)(Math.random() * ((Math.pow(2, 30) - 0) + 1));
+		int IV = 0 + (int)(Math.random() * ((Math.pow(2, 30) - 0) + 1)); // IV is randomly generated in the range [0,2^30]
 		int c = IV;
 		int i,key;
 		for (i=0;i<plaintext.length();i++){
 			key = hash.get(i%hash.size());
+			// CBC Operation + shifting
 			c = shift(plaintext.charAt(i)^c,key,1);
+			// Convert the encrypted value into binary		
 			ciphertext += c_string(c);
 			
 			log_en.add("shift(plaintext("+en_counter+")) with key "+key+" : "+c+"\nCiphertext: "+ciphertext+"\n");
@@ -78,9 +69,11 @@ public class encryption{
 		return ciphertext;
 	}
 	
+	// This splits the ciphertext and decrypts each segment.
 	public static String decrypt(String ciphertext, String key_in){
 		de_counter = 0;
 		log_de.clear();
+		
 		ArrayList<Integer> hash = new ArrayList();
 		hash(md5(key_in),hash);
 		log_de.add("md5(key): "+ md5(key_in)+"\n");
@@ -100,13 +93,13 @@ public class encryption{
 			}
 			plaintext+=tmp;
 			log_de.add("Plaintext: "+plaintext+"\n");
-			
 		}
 		
 		return plaintext;
 
 	}
 	
+	// This decrypt the message with a length of SPLIT or less than SPLIT.
 	public static String de_loop(String ciphertext,ArrayList<Integer> hash){
 		String plaintext = "";
 		int key,m = 0;
@@ -123,6 +116,7 @@ public class encryption{
 		return plaintext;
 	}
 	
+	// Caesar Cipher shifting
 	public static int shift(int c, int key, int in){
 		if (in == 1){
 			c += key;
@@ -132,6 +126,8 @@ public class encryption{
 		}
 		return c;
 	}
+	
+	// Convert a decimal integer into binary
 	public static String c_string(int c){
 		String c_string = "";
 		for (int i = 0 ; i < Z - Integer.toBinaryString(c).length();i++)
@@ -140,6 +136,7 @@ public class encryption{
 		return c_string;
 	}
 	
+	// Compute the md5 value of a string
 	public static String md5(String str){
 		try{
 	        MessageDigest md = MessageDigest.getInstance("MD5");
@@ -157,6 +154,7 @@ public class encryption{
         }
 	}
 	
+	// Hash a string into an Integer array with a length of 10
 	public static void hash(String str, ArrayList<Integer> hash){
 		int i,j,tmp;
 		for (i=0;i<str.length();i++){
@@ -192,6 +190,7 @@ public class encryption{
 	public ArrayList<String> returnLog_en(){
 		return log_en;
 	}
+	
 	public ArrayList<String> returnLog_de(){
 		return log_de;
 	}
