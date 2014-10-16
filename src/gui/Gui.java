@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.DefaultComboBoxModel;
@@ -144,7 +145,7 @@ public class Gui {
 		serverMsgPanel.setLayout(new GridLayout(7, 1));
 		displayMsgFieldOnServer = new JTextField(40);
 		displayMsgFieldOnServer
-				.setText("Wait for received message to display here");
+				.setText("Waiting for a message...");
 		displayMsgFieldOnServer.setOpaque(false);
 		serverMsgPanel.add(serverHeaderLabel);
 		serverMsgPanel.add(serverMsgLabel);
@@ -155,14 +156,14 @@ public class Gui {
 		// for the client
 		final JPanel clientMsgPanel = new JPanel();
 		final JLabel clientHeaderLabel = new JLabel("MESSAGE FROM THE CLIENT");
-		final JLabel clientMsgLabel = new JLabel("Enter your message here");
+		final JLabel clientMsgLabel = new JLabel("Enter a message here");
 		final JTextField clientMsgTextField = new JTextField(40);
 		final JLabel clientDisplayMsgLabel = new JLabel("Received message");
 
 		clientMsgPanel.setLayout(new GridLayout(7, 1));
 		displayMsgFieldOnClient = new JTextField(40);
 		displayMsgFieldOnClient
-				.setText("Wait for received message to display here");
+				.setText("Waiting for a message...");
 		displayMsgFieldOnClient.setOpaque(false);
 		clientMsgPanel.add(clientHeaderLabel);
 		clientMsgPanel.add(clientMsgLabel);
@@ -184,7 +185,7 @@ public class Gui {
 		JButton connectServerBtn = new JButton("Connect");
 		// JButton keyServerBtn = new JButton("Set key");
 		JButton sendServerMessageBtn = new JButton("Send");
-		JButton cancelServerBtn = new JButton("Cancel");
+		JButton cancelServerBtn = new JButton("Clear");
 		final JLabel stepLabelServer = new JLabel("PROGRAM LOG");
 		final JButton stepContinueBtnServer = new JButton("Continue");
 		
@@ -270,7 +271,9 @@ public class Gui {
 				isServerConnected = false;
 				serverPortNumText.setText("");
 				sharedKeyServerText.setText("");
-				statusLabel.setText("Cancel server");
+				serverMsgTextField.setText("");
+				statusLabel.setText("Clear server");
+				//myVPN.closeSocketServer();
 			}
 		});
 
@@ -282,7 +285,7 @@ public class Gui {
 
 		sendServerMessageBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				serverPortNumText.setText("");
+				//serverPortNumText.setText("");
 				// sharedKeyServerText.setText("");
 
 				if (isServerConnected) {
@@ -334,7 +337,7 @@ public class Gui {
 		final JTextField sharedKeyClientText = new JTextField(20);
 		JButton connectClientBtn = new JButton("Connect");
 		JButton sendClientMessageBtn = new JButton("Send");
-		JButton cancelClientBtn = new JButton("Cancel");
+		JButton cancelClientBtn = new JButton("Clear");
 		final JLabel stepLabelClient = new JLabel("PROGRAM LOG");
 		final JButton stepContinueBtnClient = new JButton("Continue");
 		
@@ -427,7 +430,9 @@ public class Gui {
 				clientPortNumTextField.setText("");
 				ipAddTextField.setText("");
 				sharedKeyClientText.setText("");
-				statusLabel.setText("Cancel client");
+				clientMsgTextField.setText("");
+				statusLabel.setText("Clear client");
+				//myVPN.closeSocketClient();
 			}
 		});
 
@@ -439,8 +444,8 @@ public class Gui {
 
 		sendClientMessageBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				clientPortNumTextField.setText("");
-				ipAddTextField.setText("");
+				//clientPortNumTextField.setText("");
+				//ipAddTextField.setText("");
 				sharedKeyClient = sharedKeyClientText.getText();
 				// sharedKeyClientText.setText("");
 

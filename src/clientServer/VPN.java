@@ -33,11 +33,12 @@ public class VPN{
 	private static Socket clientSocket;
 	private static BufferedReader in;
 	private static PrintWriter out;
-
+	private static int portNumServer;
+	
 	private static encryption en;
 	
-	private static boolean serverMode = true; // true is authentication mode, false is encryption mode
-	private static boolean clientMode = true; // true is authentication mode, false is encryption mode
+	private static boolean serverMode = false; // true is authentication mode, false is encryption mode
+	private static boolean clientMode = false; // true is authentication mode, false is encryption mode
 	private static String authClientMsg;
 	private static String authServerMsg;
 	
@@ -120,6 +121,7 @@ public class VPN{
 		(new Thread() {
 			@Override
 			public void run(){
+				portNumServer = portNumber;
 				System.out.println(" Server thread is running on port " + portNumber);
 				try {
 					
@@ -149,16 +151,23 @@ public class VPN{
 					}
 					
 					// ----------- Close the server's socket and streams ---------//
-					in.close();
-					out.close();
-					clientSocket.close();
-					server.close();
+					//in.close();
+					//out.close();
+					//clientSocket.close();
+					//server.close();
 
-					System.out.println("* Server closed");
+					//System.out.println("* Server closed");
 
 				}
 				catch (IOException e) {
 					System.out.println("Server IO Exception. Please try again.");
+					try {
+						clientSocket.close();
+						out.close();
+						in.close();
+						server.close();
+						runServerThread(portNumServer);
+					} catch (IOException e1) {System.out.println("test");	}
 					//e.printStackTrace();
 				}
 
@@ -234,5 +243,23 @@ public class VPN{
 	public void setServerMode(boolean mode){
 		serverMode = mode;
 	}
+	/*
+	public void closeSocketClient(){
+		try{
+			clientSocket.close();
+		}
+		catch (IOException e){
+			System.out.println("IOException occurs when closing client socket.");
+		}
+	}
+	
+	public void closeSocketServer(){
+		try{
+			clientSocket.close();
+		}
+		catch (IOException e){
+			System.out.println("IOException occurs when closing server socket.");
+		}
+	}*/
 
 }
